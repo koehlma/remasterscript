@@ -32,16 +32,17 @@ class Controller(gobject.GObject):
         self._new.connect('start', self._start)
         self._make = remasterscript.interface.new.Make()
         self._make.connect('cancel', self._cancel)
+        self._make.connect('close', self._quit)
         self._processes = {}
-        self._next_functions = [self._mkdir,
-                            self._copy_dvd,
-                            self._decompress,
-                            self._mount,
-                            self._copy_data,
-                            self._umount,
-                            self._clean]
+        self._next_functions = [#self._mkdir,
+                                    #self._copy_dvd,
+                                    #self._decompress,
+                                    #self._mount,
+                                    #self._copy_data,
+                                    #self._umount,
+                                    self._clean]
         self._undo_functions = [self._undo_mount,
-                            self._undo_mkdir]
+                                    self._undo_mkdir]
         self._undo_action = {'mount' : False,
                                 'mkdir' : False}
         self._undo_done = False
@@ -213,12 +214,15 @@ class Controller(gobject.GObject):
     
     def _clean(self):
         self._make.start('clean')
-        self._make.stop('clean', True)
-        self._next()
+        self._processes['clean'] = remasterscript.utils.Util('"%s" -rf "%s" "%s"' % (remasterscript.const.BINARY_REMOVE,
+                                                                self._target + '/knoppix-mount',
+                                                                self._target + '/knoppix.img'))
+        self._processes['clean'].connect('success', self._success, 'clean')
+        self._processes['clean'].connect('error', self._error, 'clean')
     
     def _cancel(self, button):
         if self._success_done:
-            self.emit('quit')
+            self.emit('cancel')
         else:
             self._undo(True)
     

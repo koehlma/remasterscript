@@ -2,8 +2,9 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkWindow" id="window1">
+  <object class="GtkWindow" id="window">
     <property name="title" translatable="yes">Knoppix-Remaster-Skript</property>
+    <property name="window_position">center-always</property>
     <child>
       <object class="GtkAlignment" id="alignment1">
         <property name="visible">True</property>
@@ -48,8 +49,9 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFileChooserButton" id="filechooserbutton1">
+                  <object class="GtkFileChooserButton" id="source">
                     <property name="visible">True</property>
+                    <property name="action">select-folder</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -68,7 +70,7 @@
                 <property name="visible">True</property>
                 <property name="layout_style">spread</property>
                 <child>
-                  <object class="GtkButton" id="button1">
+                  <object class="GtkButton" id="open">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -108,13 +110,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button2">
+                  <object class="GtkButton" id="cancel">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <child>
                       <object class="GtkHBox" id="hbox2">
                         <property name="visible">True</property>
+                        <property name="spacing">5</property>
                         <child>
                           <object class="GtkImage" id="image2">
                             <property name="visible">True</property>

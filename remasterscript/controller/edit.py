@@ -21,45 +21,34 @@ import os
 import gobject
 
 import remasterscript.const
-import remasterscript.interface.welcome
+import remasterscript.interface.edit
 
 class Controller(gobject.GObject):
-    def __init__(self):
+    def __init__(self, source):
         gobject.GObject.__init__(self)
-        self._welcome = remasterscript.interface.welcome.Welcome()
-        self._welcome.connect('new', self._on_new)
-        self._welcome.connect('open', self._on_open)
-        self._welcome.connect('cancel', self._on_cancel)
+        self._window = remasterscript.interface.edit.Edit()
+        self._window.connect('build', self._build)
+        self._window.connect('quit', self._quit)
+        self._source = source
     
-    def start(self):
-        self._welcome.show()
+    def start(self, *args):
+        self._window.show()
     
-    def stop(self):
-        self._welcome.hide()
+    def stop(self, *args):
+        self._window.hide()
     
-    def _on_new(self, welcome):
-        self._welcome.hide()
-        self.emit('new')
+    def _build(self, edit):
+        self.emit('build', self._source)
     
-    def _on_open(self, welcome):
-        self._welcome.hide()
-        self.emit('open')
-    
-    def _on_cancel(self, welcome):
-        self._welcome.hide()
+    def _quit(self, edit):
         self.emit('quit')
 
 gobject.type_register(Controller)
-gobject.signal_new('new',
+gobject.signal_new('build',
                         Controller,
                         gobject.SIGNAL_RUN_LAST,
                         gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('open',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
+                        (gobject.TYPE_STRING,))
 gobject.signal_new('quit',
                         Controller,
                         gobject.SIGNAL_RUN_LAST,
