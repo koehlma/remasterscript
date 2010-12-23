@@ -93,6 +93,9 @@ class Util(gobject.GObject):
     def kill(self):
         self._process.kill()
         
+    def wait(self):
+        self._process.wait()
+        
     def _on_close(self, process, returncode):
         if returncode == 0:
             self.emit('success')

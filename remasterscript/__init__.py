@@ -5,13 +5,15 @@ import os
 import gtk
 import gobject
 
-import ui
-import utils
-import const
+import controller
+
+#import ui
+#import utils
+#import const
 
 def print_event(*args):
     print args
-
+"""
 class Controller(gobject.GObject):
     def __init__(self):
         gobject.GObject.__init__(self)
@@ -144,10 +146,28 @@ gobject.signal_new('quit',
                         gobject.SIGNAL_RUN_LAST,
                         gobject.TYPE_BOOLEAN,
                         ())
+"""
+
+def _new_success(new, source):
+    edit = controller.edit.Controller(source)
+    edit.connect('quit', quit)
+    edit.connect('build', _build)
+    edit.start()
+    new.stop()
+
+def _build():
+    pass
+
 def quit(*args):
     gtk.main_quit()
 
 def main():
-    controller = Controller()
-    controller.connect('quit', quit)
+    new = controller.new.Controller()
+    new.stop()
+    new.connect('quit', quit)
+    new.connect('cancel', quit)
+    welcome = controller.welcome.Controller()
+    welcome.start()
+    welcome.connect('quit', quit)
+    welcome.connect('new', new.start)
     gtk.main()

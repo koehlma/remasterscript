@@ -6,5 +6,6 @@ BINARY_CREATE_COMPRESSED_FS = '/opt/knoppix/bin/create_compressed_fs'
 BINARY_COPY = '/bin/cp'
 BINARY_MOUNT = '/bin/mount'
 BINARY_UMOUNT = '/bin/umount'
+BINARY_REMOVE = '/bin/rm'
 
 PATH = os.path.dirname(__file__)
