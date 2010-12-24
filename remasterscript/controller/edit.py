@@ -31,6 +31,9 @@ class Controller(gobject.GObject):
         self._window.connect('quit', self._quit)
         self._source = source
     
+    def _prepare(self):
+        pass
+    
     def start(self, *args):
         self._window.show()
     

@@ -63,4 +63,4 @@ gobject.signal_new('open',
                         Open,
                         gobject.SIGNAL_RUN_LAST,
                         gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_BOOLEAN,))
+                        (gobject.TYPE_STRING,))

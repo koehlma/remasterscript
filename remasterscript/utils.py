@@ -1,4 +1,21 @@
 # -*- coding:utf8 -*-
+"""
+This file is part of Knoppix-Remaster-Script.
+
+Knoppix-Remaster-Script is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Knoppix-Remaster-Script is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
 import subprocess
 import shlex
 import re
@@ -151,6 +168,95 @@ gobject.signal_new('success',
                         ())
 gobject.signal_new('error',
                         ExtractCompressedFs,
+                        gobject.SIGNAL_RUN_LAST,
+                        gobject.TYPE_BOOLEAN,
+                        (gobject.TYPE_INT,))
+
+class CreateCompressedFs(gobject.GObject):
+    def __init__(self, temp, source, target):
+        gobject.GObject.__init__(self)
+        self._process = Process('"%s" -B 65536 -f "%s" "%s" "%s"' % (const.BINARY_CREATE_COMPRESSED_FS,
+                                                    temp,
+                                                    source,
+                                                    target))
+        self._process.connect('stderr', self._on_out)
+        self._process.connect('close', self._on_close)
+        self._number = re.compile('[0-9]+')
+        
+    def kill(self):
+        self._process.kill()
+        
+    def _on_out(self, process, fileno):
+        data = fileno.readline().strip().split(' ')
+        if len(data) > 8:
+            data = self._number.match(data[len(data) - 1])
+            if data:
+                self.emit('update', int(data.group(0)))
+        
+    def _on_close(self, process, returncode):
+        if returncode == 0:
+            self.emit('success')
+        else:
+            self.emit('error', returncode)
+            
+gobject.type_register(CreateCompressedFs)
+gobject.signal_new('update',
+                        CreateCompressedFs,
+                        gobject.SIGNAL_RUN_LAST,
+                        gobject.TYPE_BOOLEAN,
+                        (gobject.TYPE_INT,))
+gobject.signal_new('success',
+                        CreateCompressedFs,
+                        gobject.SIGNAL_RUN_LAST,
+                        gobject.TYPE_BOOLEAN,
+                        ())
+gobject.signal_new('error',
+                        CreateCompressedFs,
+                        gobject.SIGNAL_RUN_LAST,
+                        gobject.TYPE_BOOLEAN,
+                        (gobject.TYPE_INT,))
+
+class MkIsoFs(gobject.GObject):
+    def __init__(self, options, source, target):
+        gobject.GObject.__init__(self)
+        self._process = Process('"%s" %s "%s" "%s"' % (const.BINARY_MKISOFS,
+                                                            options,
+                                                            target,
+                                                            source))
+        self._process.connect('stderr', self._on_out)
+        self._process.connect('close', self._on_close)
+        self._number = re.compile('[0-9]+')
+        
+    def kill(self):
+        self._process.kill()
+        
+    def _on_out(self, process, fileno):
+        #data = fileno.readline().strip()
+        #print data
+        #data = self._number.match(data)
+        data = self._number.match(fileno.readline().strip())
+        if data:
+            self.emit('update', int(data.group(0)))
+        
+    def _on_close(self, process, returncode):
+        if returncode == 0:
+            self.emit('success')
+        else:
+            self.emit('error', returncode)
+            
+gobject.type_register(MkIsoFs)
+gobject.signal_new('update',
+                        MkIsoFs,
+                        gobject.SIGNAL_RUN_LAST,
+                        gobject.TYPE_BOOLEAN,
+                        (gobject.TYPE_INT,))
+gobject.signal_new('success',
+                        MkIsoFs,
+                        gobject.SIGNAL_RUN_LAST,
+                        gobject.TYPE_BOOLEAN,
+                        ())
+gobject.signal_new('error',
+                        MkIsoFs,
                         gobject.SIGNAL_RUN_LAST,
                         gobject.TYPE_BOOLEAN,
                         (gobject.TYPE_INT,))

@@ -26,7 +26,7 @@ import remasterscript.utils
 
 class Controller(gobject.GObject):
     def __init__(self):
-        gobject.GObject.__init__(self) 
+        gobject.GObject.__init__(self)
         self._new = remasterscript.interface.new.New()
         self._new.connect('cancel', self._cancel)
         self._new.connect('start', self._start)
@@ -34,12 +34,12 @@ class Controller(gobject.GObject):
         self._make.connect('cancel', self._cancel)
         self._make.connect('close', self._quit)
         self._processes = {}
-        self._next_functions = [#self._mkdir,
-                                    #self._copy_dvd,
-                                    #self._decompress,
-                                    #self._mount,
-                                    #self._copy_data,
-                                    #self._umount,
+        self._next_functions = [self._mkdir,
+                                    self._copy_dvd,
+                                    self._decompress,
+                                    self._mount,
+                                    self._copy_data,
+                                    self._umount,
                                     self._clean]
         self._undo_functions = [self._undo_mount,
                                     self._undo_mkdir]
