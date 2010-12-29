@@ -231,9 +231,6 @@ class MkIsoFs(gobject.GObject):
         self._process.kill()
         
     def _on_out(self, process, fileno):
-        #data = fileno.readline().strip()
-        #print data
-        #data = self._number.match(data)
         data = self._number.match(fileno.readline().strip())
         if data:
             self.emit('update', int(data.group(0)))

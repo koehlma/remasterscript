@@ -16,42 +16,32 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
+import controller
+import remasterscript.views.open as view
 
-import gobject
-
-import remasterscript.const
-import remasterscript.interface.open
-
-class Controller(gobject.GObject):
-    def __init__(self):
-        gobject.GObject.__init__(self)
-        self._window = remasterscript.interface.open.Open()
-        self._window.connect('open', self._open)
-        self._window.connect('cancel', self._cancel)
+class Open(controller.Controller):
+    def __init__(self, edit):
+        controller.Controller.__init__(self)
+        self._edit = edit
+        self._view = view.Open()
+        self._view.connect('quit', self._on_quit)
+        self._view.connect('cancel', self._on_cancel)
+        self._view.connect('open', self._on_open)
     
-    def start(self, *args):
-        self._window.show()
+    def _on_cancel(self, view):
+        self.emit('cancel')
     
-    def stop(self, *args):
-        self._window.hide()
-    
-    def _open(self, window, source):
-        self._window.hide()
-        self.emit('open', source)
-    
-    def _cancel(self, window):
-        self._window.hide()
+    def _on_open(self, view, source):
+        self._edit.set_source(source)
+        self._edit.start(self)
+        
+    def _on_quit(self, view):
         self.emit('quit')
-
-gobject.type_register(Controller)
-gobject.signal_new('open',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_STRING,))
-gobject.signal_new('quit',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
+    
+    def start(self, controller):
+        self._parent = controller
+        self._parent.stop()
+        self._view.show()
+    
+    def stop(self):
+        self._view.hide()

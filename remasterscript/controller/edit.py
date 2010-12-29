@@ -16,44 +16,42 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
+import controller
+import remasterscript.views.edit as view
 
-import gobject
-
-import remasterscript.const
-import remasterscript.interface.edit
-
-class Controller(gobject.GObject):
-    def __init__(self, source):
-        gobject.GObject.__init__(self)
-        self._window = remasterscript.interface.edit.Edit()
-        self._window.connect('build', self._build)
-        self._window.connect('quit', self._quit)
-        self._source = source
-    
-    def _prepare(self):
-        pass
-    
-    def start(self, *args):
-        self._window.show()
-    
-    def stop(self, *args):
-        self._window.hide()
-    
-    def _build(self, edit):
-        self.emit('build', self._source)
-    
-    def _quit(self, edit):
+class Edit(controller.Controller):
+    def __init__(self, build):
+        controller.Controller.__init__(self)
+        self._build = build
+        self._build.connect('success', self._build_success)
+        self._build.connect('cancel', self._build_cancel)
+        self._view = view.Edit()
+        self._view.connect('quit', self._on_quit)
+        self._view.connect('build', self._on_build)
+        
+    def _on_quit(self, view):
         self.emit('quit')
+    
+    def _build_cancel(self, controller):
+        controller.stop()
+        self._view.show()
+    
+    def _build_success(self, controller):
+        controller.stop()
+        self._view.show()
+    
+    def _on_build(self, view):
+        self._build.reset()
+        self._build.set_source(self._source)
+        self._build.start(self)
+    
+    def set_source(self, source):
+        self._source = source
 
-gobject.type_register(Controller)
-gobject.signal_new('build',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_STRING,))
-gobject.signal_new('quit',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
+    def start(self, controller):
+        self._parent = controller
+        self._parent.stop()
+        self._view.show()
+    
+    def stop(self):
+        self._view.hide()

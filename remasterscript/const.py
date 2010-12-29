@@ -29,7 +29,7 @@ BINARY_BASH = '/bin/bash'
 BINARY_QEMU = '/usr/bin/qemu'
 BINARY_CHROOT = '/usr/sbin/chroot'
 BINARY_GNOME_TERMINAL = '/usr/bin/gnome-terminal'
-BINARY_XTERM = '/usr/bin/gnome-terminal'
+BINARY_XTERM = '/usr/bin/xterm'
 
 TERMINALS = {'XTerm' : BINARY_XTERM,
                 'GNOME-Terminal' : BINARY_GNOME_TERMINAL}

@@ -6,21 +6,21 @@
     <property name="title" translatable="yes">Knoppix-Remaster-Skript</property>
     <property name="window_position">center-always</property>
     <child>
-      <object class="GtkAlignment" id="alignment1">
+      <object class="GtkAlignment" id="alignment_main">
         <property name="visible">True</property>
         <property name="top_padding">10</property>
         <property name="bottom_padding">30</property>
         <property name="left_padding">50</property>
         <property name="right_padding">50</property>
         <child>
-          <object class="GtkVBox" id="container">
+          <object class="GtkVBox" id="vbox_main">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <property name="spacing">10</property>
             <child>
-              <object class="GtkLabel" id="label1">
+              <object class="GtkLabel" id="header">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Terminal</property>
+                <property name="label" translatable="yes">Hauptmen&#xFC;</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                   <attribute name="absolute-size" value="50000"/>
@@ -33,90 +33,85 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkAlignment" id="new_alignment">
+                <property name="visible">True</property>
+                <property name="left_padding">120</property>
+                <property name="right_padding">120</property>
+                <child>
+                  <object class="GtkButton" id="new">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <child>
+                      <object class="GtkVBox" id="new_vbox">
+                        <property name="visible">True</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkImage" id="new_image">
+                            <property name="visible">True</property>
+                            <property name="stock">gtk-new</property>
+                            <property name="icon-size">5</property>
+                          </object>
+                          <packing>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="new_label">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">Neues Remaster erstellen</property>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
-              <object class="GtkHButtonBox" id="hbuttonbox1">
+              <object class="GtkAlignment" id="open_alignment">
                 <property name="visible">True</property>
-                <property name="layout_style">spread</property>
+                <property name="left_padding">120</property>
+                <property name="right_padding">120</property>
                 <child>
-                  <object class="GtkButton" id="start">
+                  <object class="GtkButton" id="open">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <child>
-                      <object class="GtkHBox" id="hbox1">
+                      <object class="GtkVBox" id="open_vbox">
                         <property name="visible">True</property>
-                        <property name="spacing">5</property>
+                        <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkImage" id="image1">
+                          <object class="GtkImage" id="open_image">
                             <property name="visible">True</property>
-                            <property name="stock">gtk-apply</property>
+                            <property name="stock">gtk-open</property>
+                            <property name="icon-size">5</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="label2">
+                          <object class="GtkLabel" id="open_label">
                             <property name="visible">True</property>
-                            <property name="label" translatable="yes">Start</property>
+                            <property name="label" translatable="yes">Bestehendes Remaster &#xF6;ffnen</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
                     </child>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="stop">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <child>
-                      <object class="GtkHBox" id="hbox2">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkImage" id="image2">
-                            <property name="visible">True</property>
-                            <property name="stock">gtk-cancel</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="label3">
-                            <property name="visible">True</property>
-                            <property name="label" translatable="yes">Abbrechen</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">1</property>
-                  </packing>
                 </child>
               </object>
               <packing>

@@ -16,52 +16,34 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import os
+import controller
+import remasterscript.views.welcome as view
 
-import gobject
-
-import remasterscript.const
-import remasterscript.interface.welcome
-
-class Controller(gobject.GObject):
-    def __init__(self):
-        gobject.GObject.__init__(self)
-        self._welcome = remasterscript.interface.welcome.Welcome()
-        self._welcome.connect('new', self._on_new)
-        self._welcome.connect('open', self._on_open)
-        self._welcome.connect('cancel', self._on_cancel)
+class Welcome(controller.Controller):
+    def __init__(self, new, open):
+        controller.Controller.__init__(self)
+        self._new = new
+        self._new.connect('cancel', self.start)
+        self._open = open        
+        self._open.connect('cancel', self.start)
+        self._view = view.Welcome()
+        self._view.connect('quit', self._on_quit)
+        self._view.connect('new', self._on_new)
+        self._view.connect('open', self._on_open)
     
-    def start(self):
-        self._welcome.show()
+    def _on_quit(self, view):
+        self.emit('quit')
+    
+    def _on_new(self, view):
+        self._new.start(self)
+    
+    def _on_open(self, view):
+        self._open.start(self)
+        
+    def start(self, controller):
+        if controller:
+            controller.stop()
+        self._view.show()
     
     def stop(self):
-        self._welcome.hide()
-    
-    def _on_new(self, welcome):
-        self._welcome.hide()
-        self.emit('new')
-    
-    def _on_open(self, welcome):
-        self._welcome.hide()
-        self.emit('open')
-    
-    def _on_cancel(self, welcome):
-        self._welcome.hide()
-        self.emit('quit')
-
-gobject.type_register(Controller)
-gobject.signal_new('new',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('open',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('quit',
-                        Controller,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
+        self._view.hide()

@@ -16,27 +16,29 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import gtk
 import gobject
+from gobject import SIGNAL_RUN_LAST, TYPE_BOOLEAN, TYPE_STRING, TYPE_INT, TYPE_PYOBJECT
 
-class Edit(gobject.GObject):
-    def __init__(self, source):
+import remasterscript.const as const
+
+class View(gobject.GObject):
+    def __init__(self, file):
         gobject.GObject.__init__(self)
-        self._source = source
+        self._builder = gtk.Builder()
+        self._builder.add_from_file(const.PATH + '/views/ui/' + file)
+        self._window = self._builder.get_object('window')
     
-    def start(self):
-        print 'Start'
+    def hide(self):
+        self._window.hide_all()
         
-    def stop(self):
-        print 'Stop'
-        
-gobject.type_register(Edit)
-gobject.signal_new('stoped',
-                        Edit,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('started',
-                        Edit,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
+    def show(self):
+        self._window.show_all()
+
+gobject.type_register(View)
+
+def type_register(type):
+    gobject.type_register(type)
+    
+def signal_new(name, type, flags, return_type, param_types):
+    gobject.signal_new(name, type, flags, return_type, param_types)

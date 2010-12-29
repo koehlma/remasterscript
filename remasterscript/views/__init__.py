@@ -16,25 +16,11 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import gtk
-
-import controller
-
-def _quit(controller):
-    gtk.main_quit()
-
-def main():
-    build = controller.build.Build()
-    build.connect('quit', _quit)
-    edit = controller.edit.Edit(build)
-    edit.connect('quit', _quit)
-    make = controller.make.Make()
-    make.connect('quit', _quit)
-    new = controller.new.New(edit, make)
-    new.connect('quit', _quit)
-    open = controller.open.Open(edit)
-    open.connect('quit', _quit)
-    welcome = controller.welcome.Welcome(new, open)
-    welcome.connect('quit', _quit)
-    welcome.start(None)
-    gtk.main()
+import build
+import edit
+import view
+import edit
+import new
+import open
+import welcome
+import make
