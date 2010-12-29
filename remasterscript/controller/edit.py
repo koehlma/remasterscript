@@ -18,6 +18,9 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 
 import controller
 import remasterscript.views.edit as view
+from remasterscript.plugins import plugins
+import remasterscript.const as const
+import remasterscript.utils as utils
 
 class Edit(controller.Controller):
     def __init__(self, build):
@@ -28,8 +31,30 @@ class Edit(controller.Controller):
         self._view = view.Edit()
         self._view.connect('quit', self._on_quit)
         self._view.connect('build', self._on_build)
+        self._view.connect('plugin-start', self._on_plugin_start)
+        self._view.connect('plugin-stop', self._on_plugin_stop)
+        self._plugins = {}
+        for plugin in plugins:
+            self._view.plugin_add(plugin.get_name(), plugin.get_description())
+            self._plugins[plugin.get_name()] = plugin
+            self._plugins[plugin.get_name()].connect('stop', self._event_plugin_stop, plugin.get_name())
+    
+    def _event_plugin_stop(self, plugin, name):
+        self._view.start_off(name)
+        self._plugins[name].stop()
         
+    def _on_plugin_start(self, view, name):
+        self._plugins[name].start()
+    
+    def _on_plugin_stop(self, view, name):
+        self._view.start_off(name)
+        self._plugins[name].stop()
+    
     def _on_quit(self, view):
+        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
+                                                    const.PATH + '/scripts/chroot-finish.sh',
+                                                    self._source))
+        process.wait()
         self.emit('quit')
     
     def _build_cancel(self, controller):
@@ -47,11 +72,21 @@ class Edit(controller.Controller):
     
     def set_source(self, source):
         self._source = source
+        for plugin in self._plugins:
+            self._plugins[plugin].set_source(source)
 
     def start(self, controller):
         self._parent = controller
         self._parent.stop()
+        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
+                                                    const.PATH + '/scripts/chroot-prepare.sh',
+                                                    self._source))
+        process.wait()
         self._view.show()
     
     def stop(self):
+        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
+                                                    const.PATH + '/scripts/chroot-finish.sh',
+                                                    self._source))
+        process.wait()
         self._view.hide()

@@ -192,9 +192,6 @@ class Make(controller.Controller):
     
     def _clean(self):
         self._view.start('clean')
-        print '"%s" -rf "%s" "%s"' % (const.BINARY_REMOVE,
-                                                                self._target + '/knoppix-mount/',
-                                                                self._target + '/knoppix.img')
         self._processes['clean'] = utils.Util('"%s" -rf "%s" "%s"' % (const.BINARY_REMOVE,
                                                                 self._target + '/knoppix-mount/',
                                                                 self._target + '/knoppix.img'))

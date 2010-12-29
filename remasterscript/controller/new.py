@@ -35,7 +35,7 @@ class New(controller.Controller):
         self.emit('quit')
     
     def _on_success(self, make):
-        self._edit.set_source(self._source)
+        self._edit.set_source(self._target)
         self._edit.start(self._make)
     
     def _on_cancel(self, view):

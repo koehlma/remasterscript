@@ -26,6 +26,57 @@ class Edit(view.View):
         self._quit.connect('clicked', self._on_quit)
         self._build = self._builder.get_object('build')
         self._build.connect('clicked', self._on_build)
+        self._plugins = self._builder.get_object('plugins')
+        self._start_buttons = {}
+        self._stop_buttons = {}
+        self._current_row = 0
+        
+    def plugin_add(self, name, description):
+        self._plugins.resize(self._current_row + 1, 4)
+        label_name = view.gtk.Label(name)
+        label_name.set_alignment(0, 0.5)
+        label_description = view.gtk.Label(description)
+        label_description.set_alignment(0, 0.5)
+        self._start_buttons[name] = self._make_start_button()
+        self._start_buttons[name].connect('clicked', self._plugin_start, name)
+        self._stop_buttons[name] = self._make_stop_button()
+        self._stop_buttons[name].connect('clicked', self._plugin_stop, name)
+        self._plugins.attach(label_name, 0, 1, self._current_row, self._current_row + 1)
+        self._plugins.attach(label_description, 1, 2, self._current_row, self._current_row + 1)
+        self._plugins.attach(self._start_buttons[name], 2, 3, self._current_row, self._current_row + 1)
+        self._plugins.attach(self._stop_buttons[name], 3, 4, self._current_row, self._current_row + 1)
+        self._current_row += 1
+    
+    def start_off(self, name):
+        self._start_buttons[name].set_active(False)
+    
+    def _make_start_button(self):
+        button = view.gtk.ToggleButton()
+        button_hbox = view.gtk.HBox()
+        button_hbox.set_spacing(5)
+        button_image = view.gtk.image_new_from_icon_name('gtk-yes', view.gtk.ICON_SIZE_BUTTON)
+        button_label = view.gtk.Label('Starten')
+        button_hbox.pack_start(button_image, False, False)
+        button_hbox.pack_start(button_label, False, False)
+        button.add(button_hbox)
+        return button
+    
+    def _make_stop_button(self):
+        button = view.gtk.Button()
+        button_hbox = view.gtk.HBox()
+        button_hbox.set_spacing(5)
+        button_image = view.gtk.image_new_from_icon_name('gtk-no', view.gtk.ICON_SIZE_BUTTON)
+        button_label = view.gtk.Label('Stoppen')
+        button_hbox.pack_start(button_image, False, False)
+        button_hbox.pack_start(button_label, False, False)
+        button.add(button_hbox)
+        return button
+    
+    def _plugin_start(self, button, name):
+        self.emit('plugin-start', name)
+    
+    def _plugin_stop(self, button, name):
+        self.emit('plugin-stop', name)
     
     def _on_build(self, button):
         self.emit('build')
@@ -39,6 +90,16 @@ view.signal_new('build',
                     view.SIGNAL_RUN_LAST,
                     view.TYPE_BOOLEAN,
                     ())
+view.signal_new('plugin-start',
+                    Edit,
+                    view.SIGNAL_RUN_LAST,
+                    view.TYPE_BOOLEAN,
+                    (view.TYPE_STRING,))
+view.signal_new('plugin-stop',
+                    Edit,
+                    view.SIGNAL_RUN_LAST,
+                    view.TYPE_BOOLEAN,
+                    (view.TYPE_STRING,))
 view.signal_new('quit',
                     Edit,
                     view.SIGNAL_RUN_LAST,
