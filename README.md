@@ -5,6 +5,7 @@ Installation
 ------------
 Für Debian gibt es ein [Paket](https://github.com/downloads/koehlma/remasterscript/remasterscript.deb).
 Fur alle anderen Distributionen müssen folgende Schritte ausgeführt werden.
+
 * Installation von `create_compressed_fs` und `extract_compressed_fs`
     * Installieren der [zlib](http://zlib.net/) inklusive der Header, die zur Entwicklung nötig sind
     * Kompilieren der Programme durch ausführen von `build.sh` im Verzeichnis `cloop`
