@@ -3,7 +3,7 @@ Version: 0.0.1-0
 Section: utils
 Priority: extra
 Architecture: i386
-Depends: qemu, coreutils, mount, mkisofs, bash, xterm, python, python-gtk2
+Depends: qemu, coreutils, mount, mkisofs, bash, xterm, python, python-gtk2, gksu
 Installed-Size: 4000
 Maintainer: maxi_king_333 
 Homepage: 
