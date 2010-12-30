@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Knoppix-Remaster-Skript
+Comment=Knoppix-Remaster-Skript
+Exec=/usr/bin/remasterscript
+Icon=remasterscript
+Terminal=false
+Type=Application
+Categories=Utility;
+StartupNotify=false

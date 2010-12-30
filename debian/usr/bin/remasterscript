@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /usr/share/remasterscript
+gksudo python remaster.py
