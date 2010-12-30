@@ -88,8 +88,8 @@ class Make(controller.Controller):
         self._view.start('mkdir', 'Undo - ')
         paths = ''
         for path in self._created_paths:
-            if os.path.exists(path):
-                paths += '"%s" ' % (path)
+            if os.path.exists(self._target + path):
+                paths += '"%s" ' % (self._target + path)
         self._processes['mkdir'] = utils.Util('"%s" -rf %s' % (const.BINARY_REMOVE,
                                                                     paths))
         self._processes['mkdir'].connect('success', self._undo_success, 'mkdir')
