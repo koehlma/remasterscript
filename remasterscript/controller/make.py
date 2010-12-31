@@ -42,6 +42,7 @@ class Make(controller.Controller):
         self._processes = {}
         self._successed = False
         self._undone = False
+        self.error_msg = None
     
     def _on_cancel(self, buton):
         self._undo('cancel')
@@ -118,12 +119,18 @@ class Make(controller.Controller):
             self._view.set(name, 'Undo', 0.0)
     
     def _error(self, process, errorcode, name):
+        errors = {'copy_dvd' : 'Kopieren der Daten von der DVD/CD',
+                        'mount' : 'Mounten des Images',
+                        'copy_data' : 'Kopieren der Daten des Images',
+                        'umount' : 'Umounten des Images',
+                        'clean' : 'Aufräumen'}
         if name in self._processes:
             self._processes.pop(name)
         self._view.stop(name, False)
         if self._undone:
             self._view.set(name, 'Undo', 0.0)
         else:
+            self.error_msg = errors[name]
             self._undo('error')
     
     def _mkdir(self):
@@ -135,6 +142,7 @@ class Make(controller.Controller):
             self._next()
         except OSError:
             self._view.stop('mkdir', False)
+            self.error_msg = 'Erstellen der Verzeichnisse'
             self._undo('error')
             
     def _copy_dvd(self):
@@ -164,6 +172,7 @@ class Make(controller.Controller):
         
     def _decompress_error(self, process, errorcode):
         self._view.set('decompress', 'Fehler', 0.0)
+        self.error_msg = 'Dekomprimieren des Images'
         self._undo('error')
     
     def _mount(self):
@@ -220,6 +229,7 @@ class Make(controller.Controller):
         self._processes = {}
         self._successed = False
         self._undone = False
+        self.error_msg = None
     
     def start(self, controller):
         self._parent = controller

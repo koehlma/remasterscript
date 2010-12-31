@@ -24,6 +24,7 @@ class New(controller.Controller):
         controller.Controller.__init__(self)
         self._edit = edit
         self._make = make
+        self._make.connect('error', self._on_error)
         self._make.connect('cancel', self.start)
         self._make.connect('success', self._on_success)
         self._view = view.New()
@@ -37,6 +38,21 @@ class New(controller.Controller):
     def _on_success(self, make):
         self._edit.set_source(self._target)
         self._edit.start(self._make)
+    
+    def _on_error(self, make):
+        dialog = view.view.gtk.MessageDialog(type = view.view.gtk.MESSAGE_ERROR, buttons = view.view.gtk.BUTTONS_OK)
+        dialog.set_title('Knoppix-Remaster-Skript')
+        if make.error_msg:
+            dialog.set_markup('<b>Fehler:</b>\nEin Fehler ist aufgetreten beim %s!!!' % (make.error_msg))
+        else:
+            dialog.set_markup('<b>Fehler:</b>\nEin unbekannter Fehler ist aufgetreten!!!')
+        dialog.connect('response', self._on_error_response)
+        dialog.connect('close', self._on_error_response)
+        dialog.run()
+        
+    def _on_error_response(self, dialog, *args):
+        dialog.destroy()
+        self.start(self._make)
     
     def _on_cancel(self, view):
         self.emit('cancel')

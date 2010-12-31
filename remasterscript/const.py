@@ -30,9 +30,11 @@ BINARY_QEMU = '/usr/bin/qemu'
 BINARY_CHROOT = '/usr/sbin/chroot'
 BINARY_GNOME_TERMINAL = '/usr/bin/gnome-terminal'
 BINARY_XTERM = '/usr/bin/xterm'
+BINARY_LXTERMINAL = '/usr/bin/lxterminal'
 
 TERMINALS = {'XTerm' : BINARY_XTERM,
-                'GNOME-Terminal' : BINARY_GNOME_TERMINAL}
+                'GNOME-Terminal' : BINARY_GNOME_TERMINAL,
+                'LXTerminal' : BINARY_LXTERMINAL}
 
 QEMU_MEM_SIZE = 256
 
