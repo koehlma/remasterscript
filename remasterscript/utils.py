@@ -68,7 +68,7 @@ class Process(gobject.GObject):
         if condition == gobject.IO_ERR or condition == gobject.IO_HUP:
             self._process.wait()
             gobject.source_remove(self._stdin_handle)
-            gobject.source_remove(self._stdin_handle)
+            gobject.source_remove(self._stderr_handle)
             self.emit('close', self._process.returncode)
             return False
         elif condition == gobject.IO_IN or condition == gobject.IO_PRI:
