@@ -24,6 +24,10 @@ import gobject
 
 import const
 
+HANDLE_STDIN = 0
+HANDLE_STDOUT = 1
+HANDLE_STDERR = 2
+
 class Process(gobject.GObject):
     def __init__(self, command, priority=gobject.PRIORITY_LOW):
         gobject.GObject.__init__(self)
@@ -54,6 +58,14 @@ class Process(gobject.GObject):
         
     def write(self, string):
         self._buffer.append(string)
+    
+    def remove_handle(self, handle):
+        if handle == HANDLE_STDIN:
+            gobject.source_remove(self._stdin_handle)
+        elif handle == HANDLE_STDOUT:
+            gobject.source_remove(self._stdout_handle)
+        elif handle == HANDLE_STDERR:
+            gobject.source_remove(self._stderr_handle)
         
     def _on_stdin(self, fileno, condition):
         self.emit('stdin', fileno)
@@ -106,7 +118,10 @@ class Util(gobject.GObject):
         gobject.GObject.__init__(self)
         self._process = Process('%s' % (command))
         self._process.connect('close', self._on_close)
-        
+    
+    def  remove_stdin(self):
+        self._process.remove_handle(HANDLE_STDIN)
+    
     def kill(self):
         self._process.kill()
         

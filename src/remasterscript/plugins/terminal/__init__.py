@@ -50,6 +50,7 @@ class Terminal(gobject.GObject):
         self._terminal = utils.Util('"%s" -e ""%s" "%s""' % (const.TERMINALS[self._get_active_text(self._combobox)],
                                                                     const.BINARY_CHROOT,
                                                                     self._source + '/rootdir/'))
+        self._terminal.remove_stdin()
         self._terminal.connect('success', self._success)
         self._terminal.connect('error', self._error)
         
