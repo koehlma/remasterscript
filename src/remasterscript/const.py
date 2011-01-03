@@ -17,6 +17,7 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
+import logging
 
 BINARY_EXTRACT_COMPRESSED_FS = '/opt/knoppix/bin/extract_compressed_fs'
 BINARY_CREATE_COMPRESSED_FS = '/opt/knoppix/bin/create_compressed_fs'
@@ -37,5 +38,7 @@ TERMINALS = {'XTerm' : BINARY_XTERM,
                 'LXTerminal' : BINARY_LXTERMINAL}
 
 QEMU_MEM_SIZE = 256
+
+LOGGING_LEVEL = logging.DEBUG
 
 PATH = os.path.dirname(__file__)

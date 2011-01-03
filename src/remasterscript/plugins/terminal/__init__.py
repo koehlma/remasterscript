@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import os
+
 import gobject
 import gtk
 
@@ -36,7 +38,8 @@ class Terminal(gobject.GObject):
         self._container = self._builder.get_object('vbox')
         self._combobox = gtk.combo_box_new_text()
         for terminal in const.TERMINALS:
-            self._combobox.append_text(terminal)
+            if os.path.exists(const.TERMINALS[terminal]):
+                self._combobox.append_text(terminal)
         self._combobox.set_active(0)
         self._container.pack_start(self._combobox, False, False)
         self._container.reorder_child(self._combobox, 1)

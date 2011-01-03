@@ -16,8 +16,13 @@ You should have received a copy of the GNU General Public License
 along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import logging
+
 import gtk
 
+import const
+logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(message)s',
+                        level = const.LOGGING_LEVEL)
 import controller
 
 def _quit(controller):
