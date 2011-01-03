@@ -1,4 +1,4 @@
-# -*- coding:utf8 -*-
+# -*- coding:utf-8 -*-
 """
 This file is part of Knoppix-Remaster-Script.
 
@@ -17,10 +17,10 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import controller
-import remasterscript.views.edit as view
+import remasterscript.core.views.edit as view
 from remasterscript.plugins import plugins
-import remasterscript.const as const
-import remasterscript.utils as utils
+import remasterscript.misc.const as const
+import remasterscript.misc.utils as utils
 
 class Edit(controller.Controller):
     def __init__(self, build):
@@ -51,24 +51,35 @@ class Edit(controller.Controller):
         self._plugins[name].stop()
     
     def _on_quit(self, view):
-        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
-                                                    const.PATH + '/scripts/chroot-finish.sh',
-                                                    self._source))
-        process.wait()
+        self._finish()
         self.emit('quit')
     
     def _build_cancel(self, controller):
         controller.stop()
+        self._prepare()
         self._view.show()
     
     def _build_success(self, controller):
         controller.stop()
+        self._prepare()
         self._view.show()
     
     def _on_build(self, view):
         self._build.reset()
         self._build.set_source(self._source)
         self._build.start(self)
+    
+    def _prepare(self):
+        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
+                                                    const.PATH + '/scripts/chroot-prepare.sh',
+                                                    self._source))
+        process.wait()
+    
+    def _finish(self):
+        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
+                                                    const.PATH + '/scripts/chroot-finish.sh',
+                                                    self._source))
+        process.wait()
     
     def set_source(self, source):
         self._source = source
@@ -78,15 +89,9 @@ class Edit(controller.Controller):
     def start(self, controller):
         self._parent = controller
         self._parent.stop()
-        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
-                                                    const.PATH + '/scripts/chroot-prepare.sh',
-                                                    self._source))
-        process.wait()
+        self._prepare()
         self._view.show()
     
     def stop(self):
-        process = utils.Util('"%s" "%s" "%s"' % (const.BINARY_BASH,
-                                                    const.PATH + '/scripts/chroot-finish.sh',
-                                                    self._source))
-        process.wait()
+        self._finish()
         self._view.hide()
