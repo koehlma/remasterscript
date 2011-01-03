@@ -32,24 +32,37 @@ class Process(gobject.GObject):
     def __init__(self, command, priority=gobject.PRIORITY_LOW):
         gobject.GObject.__init__(self)
         self._command = shlex.split(command)
+        self._priority = priority
         self._process = subprocess.Popen(self._command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         self._stdin = self._process.stdin
         self._stdout = self._process.stdout
         self._stderr = self._process.stderr
-        self._stdin_handle = gobject.io_add_watch(self._stdin,
-                                                    gobject.IO_OUT,
-                                                    self._on_stdin,
-                                                    priority=priority)
-        self._stdout_handle = gobject.io_add_watch(self._stdout,
-                                                    gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP | gobject.IO_PRI,
-                                                    self._on_stdout,
-                                                    priority=priority)
-        self._stderr_handle = gobject.io_add_watch(self._stderr,
-                                                   gobject.IO_IN | gobject.IO_PRI,
-                                                   self._on_stderr,
-                                                   priority=priority)
+        self._handles = {}
         self._buffer = []
     
+    def connect(self, detailed_signal, handler, *args):
+        if detailed_signal == 'stdin':
+            self._handles['stdin'] = gobject.io_add_watch(self._stdin,
+                                                            gobject.IO_OUT,
+                                                            self._on_stdin,
+                                                            priority=self._priority)
+        elif detailed_signal == 'stdout':
+            self._handles['stdout'] = gobject.io_add_watch(self._stdout,
+                                                           gobject.IO_IN | gobject.IO_PRI,
+                                                            self._on_stdout,
+                                                            priority=self._priority)
+        elif detailed_signal == 'stderr':
+            self._handles['stderr'] = gobject.io_add_watch(self._stderr,
+                                                           gobject.IO_IN | gobject.IO_PRI,
+                                                            self._on_stderr,
+                                                            priority=self._priority)
+        elif detailed_signal == 'close':
+            self._handles['close'] = gobject.io_add_watch(self._stdout,
+                                                            gobject.IO_ERR | gobject.IO_HUP,
+                                                            self._on_close,
+                                                            priority=self._priority)
+        return gobject.GObject.connect(self, detailed_signal, handler, *args)
+        
     def wait(self):
         self._process.wait()
     
@@ -59,14 +72,17 @@ class Process(gobject.GObject):
     def write(self, string):
         self._buffer.append(string)
     
-    def remove_handle(self, handle):
-        if handle == HANDLE_STDIN:
-            gobject.source_remove(self._stdin_handle)
-        elif handle == HANDLE_STDOUT:
-            gobject.source_remove(self._stdout_handle)
-        elif handle == HANDLE_STDERR:
-            gobject.source_remove(self._stderr_handle)
-        
+    def _on_close(self, fileno, condition):
+        self._process.wait()
+        if 'stdin' in self._handles:
+            gobject.source_remove(self._handles['stdin'])
+        if 'stdout' in self._handles:
+            gobject.source_remove(self._handles['stdout'])
+        if 'stderr' in self._handles:
+            gobject.source_remove(self._handles['stderr'])
+        self.emit('close', self._process.returncode)
+        return False
+    
     def _on_stdin(self, fileno, condition):
         self.emit('stdin', fileno)
         if self._buffer:
@@ -77,15 +93,8 @@ class Process(gobject.GObject):
         return True
     
     def _on_stdout(self, fileno, condition):
-        if condition == gobject.IO_ERR or condition == gobject.IO_HUP:
-            self._process.wait()
-            gobject.source_remove(self._stdin_handle)
-            gobject.source_remove(self._stderr_handle)
-            self.emit('close', self._process.returncode)
-            return False
-        elif condition == gobject.IO_IN or condition == gobject.IO_PRI:
-            self.emit('stdout', fileno)
-            return True
+        self.emit('stdout', fileno)
+        return True
     
     def _on_stderr(self, fileno, condition):
         self.emit('stderr', fileno)
@@ -118,10 +127,7 @@ class Util(gobject.GObject):
         gobject.GObject.__init__(self)
         self._process = Process('%s' % (command))
         self._process.connect('close', self._on_close)
-    
-    def  remove_stdin(self):
-        self._process.remove_handle(HANDLE_STDIN)
-    
+
     def kill(self):
         self._process.kill()
         
