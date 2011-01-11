@@ -17,6 +17,7 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
+import time
 
 import controller
 import remasterscript.views.build as view
@@ -168,11 +169,12 @@ class Build(controller.Controller):
         self._undo(False)
     
     def _cd_iso(self):
-        self._created_paths.append('/remaster.iso')
+        iso_time = time.strftime('%Y%m%d-%H%M')
+        self._created_paths.append('/remaster-%s.iso' % (iso_time))
         self._view.set('cd_iso', 'Gestartet', 0.0)
         self._processes['cd_iso'] = utils.MkIsoFs('-pad -l -r -J -v -V "KNOPPIX" -no-emul-boot -boot-load-size 4 -boot-info-table -b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat -hide-rr-moved -o',
                                                                         self._source + '/master',
-                                                                        self._source + '/remaster.iso')
+                                                                        self._source + '/remaster-%s.iso' % (iso_time))
         self._processes['cd_iso'].connect('update', self._cd_iso_update)
         self._processes['cd_iso'].connect('success', self._cd_iso_success)
         self._processes['cd_iso'].connect('error', self._cd_iso_error)
