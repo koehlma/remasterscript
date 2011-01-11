@@ -19,8 +19,8 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import logging
 
-BINARY_EXTRACT_COMPRESSED_FS = '/opt/knoppix/bin/extract_compressed_fs'
-BINARY_CREATE_COMPRESSED_FS = '/opt/knoppix/bin/create_compressed_fs'
+BINARY_EXTRACT_COMPRESSED_FS = '/opt/remasterscript/bin/extract_compressed_fs'
+BINARY_CREATE_COMPRESSED_FS = '/opt/remasterscript/bin/create_compressed_fs'
 BINARY_COPY = '/bin/cp'
 BINARY_MOUNT = '/bin/mount'
 BINARY_UMOUNT = '/bin/umount'

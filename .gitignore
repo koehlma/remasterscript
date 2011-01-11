@@ -4,5 +4,8 @@
 # debian package creation
 debian
 
-
+# project files
+.project
+.pydevproject
+.settings
 
