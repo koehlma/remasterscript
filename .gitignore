@@ -1,0 +1,8 @@
+# python files
+*.py[co]
+
+# debian package creation
+debian
+
+
+
