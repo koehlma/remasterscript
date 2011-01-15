@@ -33,6 +33,8 @@ BINARY_GNOME_TERMINAL = '/usr/bin/gnome-terminal'
 BINARY_XTERM = '/usr/bin/xterm'
 BINARY_LXTERMINAL = '/usr/bin/lxterminal'
 
+CREATE_COMPRESSED_FS_OPTIONS = '-B 65536'
+
 TERMINALS = {'XTerm' : BINARY_XTERM,
                 'GNOME-Terminal' : BINARY_GNOME_TERMINAL,
                 'LXTerminal' : BINARY_LXTERMINAL}

@@ -81,12 +81,7 @@ class Build(controller.Controller):
    
     def _undo_created(self):
         self._view.start('prepare', 'Undo - ')
-        paths = ''
-        for path in self._created_paths:
-            if os.path.exists(self._source + path):
-                paths += '"%s" ' % (self._source + path)
-        self._processes['prepare'] = utils.Util('"%s" -rf %s' % (const.BINARY_REMOVE,
-                                                                    paths))
+        self._processes['prepare'] = utils.Remove('-rf', self._created_paths)
         self._processes['prepare'].connect('success', self._undo_success, 'prepare')
         self._processes['prepare'].connect('error', self._undo_error, 'prepare')
 
@@ -130,9 +125,7 @@ class Build(controller.Controller):
         
     def _prepare(self):
         self._view.start('prepare')
-        self._processes['prepare'] = utils.Util('"%s" -rf "%s" "%s"' % (const.BINARY_REMOVE,
-                                                                self._source + '/master/KNOPPIX/KNOPPIX',
-                                                                self._source + '/remaster.iso'))
+        self._processes['prepare'] = utils.Remove('-rf', (self._source + '/master/KNOPPIX/KNOPPIX', self._source + '/remaster.iso'))
         self._processes['prepare'].connect('success', self._success, 'prepare')
         self._processes['prepare'].connect('error', self._error, 'prepare')
     
@@ -169,12 +162,12 @@ class Build(controller.Controller):
         self._undo(False)
     
     def _cd_iso(self):
-        iso_time = time.strftime('%Y%m%d-%H%M')
-        self._created_paths.append('/remaster-%s.iso' % (iso_time))
+        self._iso_time = time.strftime('%Y%m%d-%H%M')
+        self._created_paths.append('/remaster-%s.iso' % (self._iso_time))
         self._view.set('cd_iso', 'Gestartet', 0.0)
         self._processes['cd_iso'] = utils.MkIsoFs('-pad -l -r -J -v -V "KNOPPIX" -no-emul-boot -boot-load-size 4 -boot-info-table -b boot/isolinux/isolinux.bin -c boot/isolinux/boot.cat -hide-rr-moved -o',
                                                                         self._source + '/master',
-                                                                        self._source + '/remaster-%s.iso' % (iso_time))
+                                                                        self._source + '/remaster-%s.iso' % (self._iso_time))
         self._processes['cd_iso'].connect('update', self._cd_iso_update)
         self._processes['cd_iso'].connect('success', self._cd_iso_success)
         self._processes['cd_iso'].connect('error', self._cd_iso_error)
@@ -209,7 +202,7 @@ class Build(controller.Controller):
     def _test(self, view):
         if self._successed:
                 self._processes['test'] = utils.Util('"%s" -cdrom "%s" -m %i -no-reboot' % (const.BINARY_QEMU,
-                                                                                                    self._source + '/remaster.iso',
+                                                                                                    self._source + '/remaster-%s.iso' % (self._iso_time),
                                                                                                     const.QEMU_MEM_SIZE))
     
     def reset(self):

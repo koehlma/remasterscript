@@ -78,8 +78,7 @@ class Make(controller.Controller):
     def _undo_mount(self):
         if self._undo_actions['mount'] and 'umount' not in self._undo_actions:
             self._view.start('mount', 'Undo - ')
-            self._processes['mount'] = utils.Util('"%s" "%s"' % (const.BINARY_UMOUNT,
-                                                                        self._target + '/knoppix-mount/'))
+            self._processes['mount'] = utils.Umount(self._target + '/knoppix-mount/')
             self._processes['mount'].connect('success', self._undo_success, 'mount')
             self._processes['mount'].connect('error', self._undo_error, 'mount')
         else:
@@ -87,12 +86,7 @@ class Make(controller.Controller):
     
     def _undo_created(self):
         self._view.start('mkdir', 'Undo - ')
-        paths = ''
-        for path in self._created_paths:
-            if os.path.exists(self._target + path):
-                paths += '"%s" ' % (self._target + path)
-        self._processes['mkdir'] = utils.Util('"%s" -rf %s' % (const.BINARY_REMOVE,
-                                                                    paths))
+        self._processes['mkdir'] = utils.Remove('-rf', self._created_paths)
         self._processes['mkdir'].connect('success', self._undo_success, 'mkdir')
         self._processes['mkdir'].connect('error', self._undo_error, 'mkdir')
 
@@ -148,16 +142,13 @@ class Make(controller.Controller):
     def _copy_dvd(self):
         self._view.start('copy_dvd')
         self._created_paths.append(self._target + '/master/')
-        self._processes['copy_dvd'] = utils.Util('"%s" -rp "%s" "%s"' % (const.BINARY_COPY,
-                                                                            self._source,
-                                                                            self._target + '/master/'))
+        self._processes['copy_dvd'] = utils.Copy('-rp', self._source, self._target + '/master/')
         self._processes['copy_dvd'].connect('success', self._success, 'copy_dvd')
         self._processes['copy_dvd'].connect('error', self._error, 'copy_dvd')
         
     def _decompress(self):
         self._created_paths.append(self._target + '/knoppix.img')
-        self._processes['extract_compressed_fs'] = utils.ExtractCompressedFs(self._target + '/master/KNOPPIX/KNOPPIX',
-                                                                                                self._target + '/knoppix.img')
+        self._processes['extract_compressed_fs'] = utils.ExtractCompressedFs(self._target + '/master/KNOPPIX/KNOPPIX', self._target + '/knoppix.img')
         self._processes['extract_compressed_fs'].connect('update', self._decompress_update)
         self._processes['extract_compressed_fs'].connect('success', self._decompress_success)
         self._processes['extract_compressed_fs'].connect('error', self._decompress_error)
@@ -177,33 +168,26 @@ class Make(controller.Controller):
     
     def _mount(self):
         self._view.start('mount')
-        self._processes['mount'] = utils.Util('"%s" -r -o loop "%s" "%s"' % (const.BINARY_MOUNT,
-                                                    self._target + '/knoppix.img',
-                                                    self._target + '/knoppix-mount'))
+        self._processes['mount'] = utils.Mount('-r -o loop', self._target + '/knoppix.img', self._target + '/knoppix-mount')
         self._processes['mount'].connect('success', self._success, 'mount')
         self._processes['mount'].connect('error', self._error, 'mount')
     
     def _copy_data(self):
         self._view.start('copy_data')
         self._created_paths.append(self._target + '/rootdir/')
-        self._processes['copy_data'] = utils.Util('"%s" -rp "%s" "%s"' % (const.BINARY_COPY,
-                                                                            self._target + '/knoppix-mount',
-                                                                            self._target + '/rootdir/'))
+        self._processes['copy_data'] = utils.Copy('-rp', self._target + '/knoppix-mount', self._target + '/rootdir/')
         self._processes['copy_data'].connect('success', self._success, 'copy_data')
         self._processes['copy_data'].connect('error', self._error, 'copy_data')
     
     def _umount(self):
         self._view.start('umount')
-        self._processes['umount'] = utils.Util('"%s" "%s"' % (const.BINARY_UMOUNT,
-                                                                self._target + '/knoppix-mount'))
+        self._processes['umount'] = utils.Umount(self._target + '/knoppix-mount')
         self._processes['umount'].connect('success', self._success, 'umount')
         self._processes['umount'].connect('error', self._error, 'umount')
     
     def _clean(self):
         self._view.start('clean')
-        self._processes['clean'] = utils.Util('"%s" -rf "%s" "%s"' % (const.BINARY_REMOVE,
-                                                                self._target + '/knoppix-mount/',
-                                                                self._target + '/knoppix.img'))
+        self._processes['clean'] = utils.Remove('-rf', (self._target + '/knoppix-mount/', self._target + '/knoppix.img'))
         self._processes['clean'].connect('success', self._success, 'clean')
         self._processes['clean'].connect('error', self._error, 'clean')
 

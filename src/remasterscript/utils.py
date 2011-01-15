@@ -13,7 +13,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
+along with Knoppix-Remaster-Script. If not, see <http://www.gnu.org/licenses/>.
 """
 
 import subprocess
@@ -23,10 +23,6 @@ import re
 import gobject
 
 import const
-
-HANDLE_STDIN = 0
-HANDLE_STDOUT = 1
-HANDLE_STDERR = 2
 
 class Process(gobject.GObject):
     def __init__(self, command, priority=gobject.PRIORITY_LOW):
@@ -41,22 +37,22 @@ class Process(gobject.GObject):
         self._buffer = []
     
     def connect(self, detailed_signal, handler, *args):
-        if detailed_signal == 'stdin':
+        if detailed_signal == 'stdin' and 'stdin' not in self._handles:
             self._handles['stdin'] = gobject.io_add_watch(self._stdin,
                                                             gobject.IO_OUT,
                                                             self._on_stdin,
                                                             priority=self._priority)
-        elif detailed_signal == 'stdout':
+        elif detailed_signal == 'stdout' and 'stdout' not in self._handles:
             self._handles['stdout'] = gobject.io_add_watch(self._stdout,
                                                            gobject.IO_IN | gobject.IO_PRI,
                                                             self._on_stdout,
                                                             priority=self._priority)
-        elif detailed_signal == 'stderr':
+        elif detailed_signal == 'stderr' and 'stderr' not in self._handles:
             self._handles['stderr'] = gobject.io_add_watch(self._stderr,
                                                            gobject.IO_IN | gobject.IO_PRI,
                                                             self._on_stderr,
                                                             priority=self._priority)
-        elif detailed_signal == 'close':
+        elif detailed_signal == 'close' and 'close' not in self._handles:
             self._handles['close'] = gobject.io_add_watch(self._stdout,
                                                             gobject.IO_ERR | gobject.IO_HUP,
                                                             self._on_close,
@@ -64,10 +60,13 @@ class Process(gobject.GObject):
         return gobject.GObject.connect(self, detailed_signal, handler, *args)
         
     def wait(self):
-        self._process.wait()
+        return self._process.wait()
     
     def kill(self):
-        self._process.kill()
+        return self._process.kill()
+    
+    def poll(self):
+        return self._process.poll()
         
     def write(self, string):
         self._buffer.append(string)
@@ -100,39 +99,44 @@ class Process(gobject.GObject):
         self.emit('stderr', fileno)
         return True
 
-gobject.type_register(Process)
-gobject.signal_new('stdin',
-                        Process,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_PYOBJECT,))
-gobject.signal_new('stdout',
-                        Process,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_PYOBJECT,))
-gobject.signal_new('stderr',
-                        Process,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_PYOBJECT,))
-gobject.signal_new('close',
-                        Process,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
+def register_Process():
+
+    gobject.type_register(Process)
+    gobject.signal_new('stdin',
+                            Process,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            (gobject.TYPE_PYOBJECT,))
+    gobject.signal_new('stdout',
+                            Process,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            (gobject.TYPE_PYOBJECT,))
+    gobject.signal_new('stderr',
+                            Process,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            (gobject.TYPE_PYOBJECT,))
+    gobject.signal_new('close',
+                            Process,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            (gobject.TYPE_INT,))
 
 class Util(gobject.GObject):
     def __init__(self, command):
         gobject.GObject.__init__(self)
-        self._process = Process('%s' % (command))
+        self._process = Process(command)
         self._process.connect('close', self._on_close)
-
+    
     def kill(self):
-        self._process.kill()
-        
+        return self._process.kill()
+    
     def wait(self):
-        self._process.wait()
+        return self._process.wait()
+    
+    def poll(self):
+        return self._process.poll()
         
     def _on_close(self, process, returncode):
         if returncode == 0:
@@ -140,141 +144,131 @@ class Util(gobject.GObject):
         else:
             self.emit('error', returncode)
 
-gobject.type_register(Util)
-gobject.signal_new('success',
-                        Util,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('error',
-                        Util,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
+def register_Util():
+    gobject.type_register(Util)
+    gobject.signal_new('success',
+                            Util,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            ())
+    gobject.signal_new('error',
+                            Util,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            (gobject.TYPE_INT,))
 
-class ExtractCompressedFs(gobject.GObject):
+class UpdateUtil(Util):
+    def __init__(self, command):
+        Util.__init__(self, command)
+
+def register_UpdateUtil():
+    gobject.type_register(UpdateUtil)
+    gobject.signal_new('update',
+                            UpdateUtil,
+                            gobject.SIGNAL_RUN_LAST,
+                            gobject.TYPE_BOOLEAN,
+                            (gobject.TYPE_PYOBJECT,))
+
+register_Process()
+register_Util()
+register_UpdateUtil()
+
+class ExtractCompressedFs(UpdateUtil):
     def __init__(self, source, target):
-        gobject.GObject.__init__(self)
-        self._process = Process('"%s" "%s" "%s"' % (const.BINARY_EXTRACT_COMPRESSED_FS,
-                                                    source,
-                                                    target))
-        self._process.connect('stderr', self._on_out)
-        self._process.connect('close', self._on_close)
+        self._source = source
+        self._target = target
         self._number = re.compile('^[0-9]+')
-        
-    def kill(self):
-        self._process.kill()
-        
+        UpdateUtil.__init__(self, '"%s" "%s" "%s"' % (const.BINARY_EXTRACT_COMPRESSED_FS,
+                                                            self._source,
+                                                            self._target))
+        self._process.connect('stderr', self._on_out)
+       
     def _on_out(self, process, fileno):
         data = self._number.match(fileno.readline())
         if data:
             self.emit('update', int(data.group(0)))
-        
-    def _on_close(self, process, returncode):
-        if returncode == 0:
-            self.emit('success')
-        else:
-            self.emit('error', returncode)
-            
-gobject.type_register(ExtractCompressedFs)
-gobject.signal_new('update',
-                        ExtractCompressedFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
-gobject.signal_new('success',
-                        ExtractCompressedFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('error',
-                        ExtractCompressedFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
 
-class CreateCompressedFs(gobject.GObject):
+class CreateCompressedFs(UpdateUtil):
     def __init__(self, temp, source, target):
-        gobject.GObject.__init__(self)
-        self._process = Process('"%s" -B 65536 -f "%s" "%s" "%s"' % (const.BINARY_CREATE_COMPRESSED_FS,
-                                                    temp,
-                                                    source,
-                                                    target))
-        self._process.connect('stderr', self._on_out)
-        self._process.connect('close', self._on_close)
+        self._temp = temp
+        self._source = source
+        self._target = target
         self._number = re.compile('[0-9]+')
-        
-    def kill(self):
-        self._process.kill()
-        
+        UpdateUtil.__init__(self, '"%s" %s -f "%s" "%s" "%s"' % (const.BINARY_CREATE_COMPRESSED_FS,
+                                                                    const.CREATE_COMPRESSED_FS_OPTIONS,
+                                                                    self._temp,
+                                                                    self._source,
+                                                                    self._target))
+        self._process.connect('stderr', self._on_out)
+
     def _on_out(self, process, fileno):
         data = fileno.readline().strip().split(' ')
         if len(data) > 8:
             data = self._number.match(data[len(data) - 1])
             if data:
                 self.emit('update', int(data.group(0)))
-        
-    def _on_close(self, process, returncode):
-        if returncode == 0:
-            self.emit('success')
-        else:
-            self.emit('error', returncode)
-            
-gobject.type_register(CreateCompressedFs)
-gobject.signal_new('update',
-                        CreateCompressedFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
-gobject.signal_new('success',
-                        CreateCompressedFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('error',
-                        CreateCompressedFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
 
-class MkIsoFs(gobject.GObject):
+class Copy(Util):
+    def __init__(self, options, sources, target):
+        self._options = options
+        self._target = target
+        if type(sources) == tuple or type(sources) == list:
+            sources_quote = []
+            for source in sources:
+                sources_quote.append('"' + source + '"')
+            self._source = ' '.join(sources_quote)
+        else:
+            self._source = sources
+        Util.__init__(self, '"%s" %s %s "%s"' % (const.BINARY_COPY,
+                                                        self._options,
+                                                        self._source,
+                                                        self._target))
+
+class Mount(Util):
     def __init__(self, options, source, target):
-        gobject.GObject.__init__(self)
-        self._process = Process('"%s" %s "%s" "%s"' % (const.BINARY_MKISOFS,
-                                                            options,
-                                                            target,
-                                                            source))
-        self._process.connect('stderr', self._on_out)
-        self._process.connect('close', self._on_close)
+        self._options = options
+        self._source = source
+        self._target = target
+        Util.__init__(self, '"%s" %s "%s" "%s"' % (const.BINARY_MOUNT,
+                                                    self._options,
+                                                    self._source,
+                                                    self._target))
+
+class Umount(Util):
+    def __init__(self, path):
+        self._path = path
+        Util.__init__(self, '"%s" "%s"' % (const.BINARY_UMOUNT,
+                                                    self._path))
+
+#class MountManager(gobject.GObject): pass
+
+class Remove(Util):
+    def __init__(self, options, paths):
+        self._options = options
+        paths_quote = []
+        if type(paths) == tuple or type(paths) == list:
+            for path in paths:
+                paths_quote.append('"' + path + '"')
+            self._path = ' '.join(paths_quote)
+        else:
+            self._path = paths
+        Util.__init__(self, '"%s" %s %s' % (const.BINARY_REMOVE,
+                                                self._options,
+                                                self._path))
+
+class MkIsoFs(UpdateUtil):
+    def __init__(self, options, source, target):
+        self._options = options
+        self._source = source
+        self._target = target
         self._number = re.compile('[0-9]+')
-        
-    def kill(self):
-        self._process.kill()
+        UpdateUtil.__init__(self, '"%s" %s "%s" "%s"' % (const.BINARY_MKISOFS,
+                                                            self._options,
+                                                            self._target,
+                                                            self._source))
+        self._process.connect('stderr', self._on_out)
         
     def _on_out(self, process, fileno):
         data = self._number.match(fileno.readline().strip())
         if data:
             self.emit('update', int(data.group(0)))
-        
-    def _on_close(self, process, returncode):
-        if returncode == 0:
-            self.emit('success')
-        else:
-            self.emit('error', returncode)
-            
-gobject.type_register(MkIsoFs)
-gobject.signal_new('update',
-                        MkIsoFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
-gobject.signal_new('success',
-                        MkIsoFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        ())
-gobject.signal_new('error',
-                        MkIsoFs,
-                        gobject.SIGNAL_RUN_LAST,
-                        gobject.TYPE_BOOLEAN,
-                        (gobject.TYPE_INT,))
