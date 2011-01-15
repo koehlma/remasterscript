@@ -18,8 +18,8 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 
 import gobject
 
-import remasterscript.const as const
-import remasterscript.utils as utils
+import remasterscript.misc.const as const
+import remasterscript.misc.utils as utils
 
 class Synaptic(gobject.GObject):
     def __init__(self):

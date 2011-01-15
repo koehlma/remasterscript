@@ -21,8 +21,8 @@ import os
 import gobject
 import gtk
 
-import remasterscript.const as const
-import remasterscript.utils as utils
+import remasterscript.misc.const as const
+import remasterscript.misc.utils as utils
 
 class Terminal(gobject.GObject):
     def __init__(self):

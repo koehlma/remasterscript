@@ -20,8 +20,8 @@ import os
 
 import controller
 import remasterscript.views.make as view
-import remasterscript.utils as utils
-import remasterscript.const as const
+import remasterscript.misc.utils as utils
+import remasterscript.misc.const as const
 
 class Make(controller.Controller):
     def __init__(self):

@@ -20,7 +20,7 @@ import gtk
 import gobject
 from gobject import SIGNAL_RUN_LAST, TYPE_BOOLEAN, TYPE_STRING, TYPE_INT, TYPE_PYOBJECT
 
-import remasterscript.const as const
+import remasterscript.misc.const as const
 
 class View(gobject.GObject):
     def __init__(self, file):

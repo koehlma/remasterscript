@@ -19,8 +19,8 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 import controller
 import remasterscript.views.edit as view	
 from remasterscript.plugins import plugins
-import remasterscript.const as const
-import remasterscript.utils as utils
+import remasterscript.misc.const as const
+import remasterscript.misc.utils as utils
 
 class Edit(controller.Controller):
     def __init__(self, build):
