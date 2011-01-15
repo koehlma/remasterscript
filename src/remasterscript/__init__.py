@@ -20,10 +20,10 @@ import logging
 
 import gtk
 
-import const
+import misc.const as const
 logging.basicConfig(format = '%(asctime)s - %(levelname)s - %(message)s',
                         level = const.LOGGING_LEVEL)
-import controller
+import core.controller as controller
 
 def _quit(controller):
     gtk.main_quit()

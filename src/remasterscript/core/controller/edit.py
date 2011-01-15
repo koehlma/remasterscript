@@ -17,7 +17,7 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import controller
-import remasterscript.views.edit as view	
+import remasterscript.core.views.edit as view	
 from remasterscript.plugins import plugins
 import remasterscript.misc.const as const
 import remasterscript.misc.utils as utils

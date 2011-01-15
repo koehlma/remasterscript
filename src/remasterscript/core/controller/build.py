@@ -20,7 +20,7 @@ import os
 import time
 
 import controller
-import remasterscript.views.build as view
+import remasterscript.core.views.build as view
 import remasterscript.misc.utils as utils
 import remasterscript.misc.const as const
 

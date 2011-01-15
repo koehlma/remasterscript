@@ -43,4 +43,4 @@ QEMU_MEM_SIZE = 256
 
 LOGGING_LEVEL = logging.DEBUG
 
-PATH = os.path.join(os.path.dirname(__file__), '../')
+PATH = os.path.join(os.path.dirname(__file__), '..')

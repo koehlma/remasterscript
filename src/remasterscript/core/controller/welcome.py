@@ -17,30 +17,32 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import controller
-import remasterscript.views.open as view
+import remasterscript.core.views.welcome as view
 
-class Open(controller.Controller):
-    def __init__(self, edit):
+class Welcome(controller.Controller):
+    def __init__(self, new, open):
         controller.Controller.__init__(self)
-        self._edit = edit
-        self._view = view.Open()
+        self._new = new
+        self._new.connect('cancel', self.start)
+        self._open = open        
+        self._open.connect('cancel', self.start)
+        self._view = view.Welcome()
         self._view.connect('quit', self._on_quit)
-        self._view.connect('cancel', self._on_cancel)
+        self._view.connect('new', self._on_new)
         self._view.connect('open', self._on_open)
     
-    def _on_cancel(self, view):
-        self.emit('cancel')
-    
-    def _on_open(self, view, source):
-        self._edit.set_source(source)
-        self._edit.start(self)
-        
     def _on_quit(self, view):
         self.emit('quit')
     
+    def _on_new(self, view):
+        self._new.start(self)
+    
+    def _on_open(self, view):
+        self._open.start(self)
+        
     def start(self, controller):
-        self._parent = controller
-        self._parent.stop()
+        if controller:
+            controller.stop()
         self._view.show()
     
     def stop(self):

@@ -19,7 +19,7 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 import os
 
 import controller
-import remasterscript.views.make as view
+import remasterscript.core.views.make as view
 import remasterscript.misc.utils as utils
 import remasterscript.misc.const as const
 

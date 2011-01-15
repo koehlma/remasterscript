@@ -17,7 +17,7 @@ along with Knoppix-Remaster-Script.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import controller
-import remasterscript.views.new as view
+import remasterscript.core.views.new as view
 
 class New(controller.Controller):
     def __init__(self, edit, make):

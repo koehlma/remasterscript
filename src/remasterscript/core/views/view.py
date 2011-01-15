@@ -26,7 +26,7 @@ class View(gobject.GObject):
     def __init__(self, file):
         gobject.GObject.__init__(self)
         self._builder = gtk.Builder()
-        self._builder.add_from_file(const.PATH + '/views/ui/' + file)
+        self._builder.add_from_file(const.PATH + '/core/views/ui/' + file)
         self._window = self._builder.get_object('window')
     
     def hide(self):
