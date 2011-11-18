@@ -126,6 +126,8 @@ def register_Process():
 class Util(gobject.GObject):
     def __init__(self, command):
         gobject.GObject.__init__(self)
+        print 'command'
+        print command
         self._process = Process(command)
         self._process.connect('close', self._on_close)
     
@@ -188,26 +190,16 @@ class ExtractCompressedFs(UpdateUtil):
         if data:
             self.emit('update', int(data.group(0)))
 
-class CreateCompressedFs(UpdateUtil):
-    def __init__(self, temp, source, target):
-        self._temp = temp
+class CreateCompressedFs(Util):
+    def __init__(self, source, target):
+        print 'create compressed fs'
         self._source = source
         self._target = target
-        self._number = re.compile('[0-9]+')
-        UpdateUtil.__init__(self, '"%s" %s -f "%s" "%s" "%s"' % (const.BINARY_CREATE_COMPRESSED_FS,
-                                                                    const.CREATE_COMPRESSED_FS_OPTIONS,
-                                                                    self._temp,
+        print 'starting util'
+        Util.__init__(self, '"%s" "%s" "%s" %s' % (const.BINARY_CREATE_COMPRESSED_FS,
                                                                     self._source,
-                                                                    self._target))
-        self._process.connect('stderr', self._on_out)
-
-    def _on_out(self, process, fileno):
-        data = fileno.readline().strip().split(' ')
-        if len(data) > 8:
-            data = self._number.match(data[len(data) - 1])
-            if data:
-                self.emit('update', int(data.group(0)))
-
+                                                                    self._target,
+                                                                    const.CREATE_COMPRESSED_FS_OPTIONS))
 class Copy(Util):
     def __init__(self, options, sources, target):
         self._options = options

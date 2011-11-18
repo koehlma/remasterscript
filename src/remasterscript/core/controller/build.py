@@ -32,7 +32,6 @@ class Build(controller.Controller):
         self._view.connect('back', self._on_back)
         self._view.connect('quit', self._on_quit)
         self._functions = [self._prepare,
-                                self._image_iso,
                                 self._compress,
                                 self._sha1,
                                 self._cd_iso,
@@ -137,30 +136,7 @@ class Build(controller.Controller):
                                                             self._source + '/master/KNOPPIX/sha1sums'))
         self._processes['sha1'].connect('success', self._success, 'sha1')
         self._processes['sha1'].connect('error', self._error, 'sha1')
-    
-    def _image_iso(self):
-        self._created_paths.append('/tmp.iso')
-        self._view.set('image_iso', 'Gestartet', 0.0)
-        self._processes['image_iso'] = utils.MkIsoFs('-R -U -V "KNOPPIX.net filesystem" -publisher "KNOPPIX" -hide-rr-moved -cache-inodes -no-bak -pad -o',
-                                                                        self._source + '/rootdir',
-                                                                        self._source + '/tmp.iso')
-        self._processes['image_iso'].connect('update', self._image_iso_update)
-        self._processes['image_iso'].connect('success', self._image_iso_success)
-        self._processes['image_iso'].connect('error', self._image_iso_error)
-        
-    
-    def _image_iso_update(self, process, percentage):
-        self._view.set('image_iso', str(percentage) + '%', float(percentage) / 100)
-    
-    def _image_iso_success(self, process):
-        self._processes.pop('image_iso')
-        self._view.set('image_iso', 'Fertig', 1.0)
-        self._next()
-    
-    def _image_iso_error(self, process, errorcode):
-        self._view.set('image_iso', 'Fehler', 0.0)
-        self._undo(False)
-    
+     
     def _cd_iso(self):
         self._iso_time = time.strftime('%Y%m%d-%H%M')
         self._created_paths.append('/remaster-%s.iso' % (self._iso_time))
@@ -186,19 +162,15 @@ class Build(controller.Controller):
         self._undo(False)
     
     def _compress(self):
-        self._created_paths.append('/tmpcompress.iso')
+        print 'compress, start'
         self._view.start('compress')
-        self._processes['compress'] = utils.CreateCompressedFs(self._source + '/tmpcompress.iso',
-                                                                                    self._source + '/tmp.iso',
-                                                                                    self._source + '/master/KNOPPIX/KNOPPIX')
-        self._processes['compress'].connect('update', self._compress_update)
+        print 'compress, process'
+        self._processes['compress'] = utils.CreateCompressedFs(self._source + '/rootdir/',
+                                                               self._source + '/master/KNOPPIX/KNOPPIX')
+        print 'compress, connect'
         self._processes['compress'].connect('success', self._success, 'compress')
         self._processes['compress'].connect('error', self._error, 'compress')
-        
-    
-    def _compress_update(self, process, time):
-        self._view.set_text('compress', 'Noch %i Sekunden' % (time))
-    
+
     def _test(self, view):
         if self._successed:
                 self._processes['test'] = utils.Util('"%s" -cdrom "%s" -m %i -no-reboot' % (const.BINARY_QEMU,
@@ -209,7 +181,6 @@ class Build(controller.Controller):
         self._view.remove_all_idle()
         self._view.set_all('Nicht Gestartet', 0.0)
         self._functions = [self._prepare,
-                                self._image_iso,
                                 self._compress,
                                 self._sha1,
                                 self._cd_iso,

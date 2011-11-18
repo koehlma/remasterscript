@@ -20,7 +20,7 @@ import os
 import logging
 
 BINARY_EXTRACT_COMPRESSED_FS = '/opt/remasterscript/bin/extract_compressed_fs'
-BINARY_CREATE_COMPRESSED_FS = '/opt/remasterscript/bin/create_compressed_fs'
+BINARY_CREATE_COMPRESSED_FS = '/usr/bin/mksquashfs'
 BINARY_COPY = '/bin/cp'
 BINARY_MOUNT = '/bin/mount'
 BINARY_UMOUNT = '/bin/umount'
@@ -33,7 +33,7 @@ BINARY_GNOME_TERMINAL = '/usr/bin/gnome-terminal'
 BINARY_XTERM = '/usr/bin/xterm'
 BINARY_LXTERMINAL = '/usr/bin/lxterminal'
 
-CREATE_COMPRESSED_FS_OPTIONS = '-B 65536'
+CREATE_COMPRESSED_FS_OPTIONS = '-comp xz'
 
 TERMINALS = {'XTerm' : BINARY_XTERM,
                 'GNOME-Terminal' : BINARY_GNOME_TERMINAL,

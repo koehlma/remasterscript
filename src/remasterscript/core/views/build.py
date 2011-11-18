@@ -29,7 +29,6 @@ class Build(view.View):
         self._test = self._builder.get_object('test')
         self._test.connect('clicked', self._on_test)
         self._bars = {'prepare' : self._builder.get_object('prepare'),
-                            'image_iso' : self._builder.get_object('image_iso'),
                             'compress' : self._builder.get_object('compress'),
                             'sha1' : self._builder.get_object('sha1'),
                             'cd_iso' : self._builder.get_object('cd_iso'),
