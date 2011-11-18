@@ -1,0 +1,44 @@
+--- init.orig	2011-11-18 03:35:18.203987040 +0000
++++ init	2011-11-18 03:42:22.000000000 +0000
+@@ -14,7 +14,8 @@
+ RESET="]R"
+ # ANSI COLORS
+ # Erase to end of line
+-CRE="[K"
++CRE="
++[K"
+ # Clear entire screen
+ CLEAR="[H[J"
+ # Normal color
+@@ -780,27 +781,22 @@
+ 
+ mountknoppix(){
+  local k dev dir count=0 RC=0
+- [ -b /dev/cloop ] || mknod -m 644 /dev/cloop b 240 0
+- grep -q cloop /proc/devices     || insmod /mnt-system/"$knoppix_dir"/modules/cloop.ko preload=32 || return 2
+  grep -q aufs  /proc/filesystems || insmod /mnt-system/"$knoppix_dir"/modules/aufs.ko || return 3
+  for k in /mnt-system/"$knoppix_dir"/[Kk][Nn][Oo][Pp][Pp][Ii][Xx] \
+           /mnt-system/"$knoppix_dir"/[Kk][Nn][Oo][Pp][Pp][Ii][Xx][0-9]; do
+   [ -r "$k" ] || continue
+   check_knoppix "$k"
+   if [ $count = 0 ]; then
+-   dev=/dev/cloop ; dir=/KNOPPIX
++   dir=/KNOPPIX
+   else
+-   dev=/dev/cloop$count ; dir=/KNOPPIX$count
+-   [ -b $dev ] || mknod -m 644 $dev b 240 $count
+-   [ -d $dir ] || mkdir -m 755 $dir
++   dir=/KNOPPIX$count
+   fi
+-  if ! losetup $dev $k >/dev/null 2>&1 || ! mount -r -t iso9660 $dev $dir >/dev/null 2>&1; then
++  if ! mount -r -t squashfs -o loop $k $dir >/dev/null 2>&1; then
+    # Verbose error message
+    echo -n -e "\n\r${RED}${BROKENIMAGE}: $k ${ON} "; mount | grep /mnt-system; dmesg | tail | grep cloop; echo -n "${NORMAL}"
+    # Clean up for next retry
+-   for dev in /dev/cloop*; do
++   for dev in /dev/loop*; do
+     umount -f "$dev" >/dev/null 2>&1
+-    losetup -d "$dev" >/dev/null 2>&1
+    done
+    return 4
+   fi
