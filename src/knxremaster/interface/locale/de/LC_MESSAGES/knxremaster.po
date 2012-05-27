@@ -1,0 +1,100 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: knxremaster\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-28 00:18+0100\n"
+"PO-Revision-Date: 2012-05-28 00:19+0100\n"
+"Last-Translator: Maximilian Köhl <linuxmaxi@googlemail.com>\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
+"X-Poedit-Basepath: /home/maximilian/Development/Python/remasterscript/src/knxremaster\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-SearchPath-0: ./interface\n"
+
+#: interface/create.py:43
+msgid "create directory structure..."
+msgstr "Erstelle Verzeichnis Struktur..."
+
+#: interface/create.py:44
+msgid "copy cd/dvd..."
+msgstr "Kopiere CD/DVD..."
+
+#: interface/create.py:45
+msgid "extract compressed filesytem..."
+msgstr "Entpacke Dateisystem..."
+
+#: interface/create.py:46
+msgid "mount extracted filesystem..."
+msgstr "Mounte entpacktes Dateisystem..."
+
+#: interface/create.py:47
+msgid "copy mounted filesystem..."
+msgstr "Kopiere gemountetes Dateisystem..."
+
+#: interface/create.py:48
+msgid "umount compressed filesystem..."
+msgstr "Umounte komprimiertes Dateisystem..."
+
+#: interface/create.py:49
+msgid "cleanup..."
+msgstr "Aufräumen..."
+
+#: interface/create.py:54
+msgid "Knoppix Remasterscript"
+msgstr "Knoppix Remasterskript"
+
+#: interface/create.py:64
+msgid ""
+"<span weight=\"bold\">Welcome to Knoppix Remasterscript!!!</span>\n"
+"This assistant will guide you through the steps of creating your own Remaster."
+msgstr ""
+"<span weight=\"bold\">Willkommen zum Knoppix Remasterskript!!!</span>\n"
+"Dieser Assistent führt Dich durch die Schritte, die zum Erstellen Deines Remasters erforderlich sind."
+
+#: interface/create.py:67
+#: interface/create.py:82
+msgid "Source"
+msgstr "Quelle"
+
+#: interface/create.py:74
+#: interface/create.py:86
+msgid "Target"
+msgstr "Ziel"
+
+#: interface/create.py:100
+msgid "Welcome"
+msgstr "Willkommen"
+
+#: interface/create.py:105
+msgid ""
+"<span weight=\"bold\">Creating a new Remaster!!!</span>\n"
+"This script is now creating a new Remaster only for you."
+msgstr ""
+"<span weight=\"bold\">Erstelle ein neues Remaster!!!</span>\n"
+"Dieses Skript erstellt nun ein neues Remaster, nur für Dich."
+
+#: interface/create.py:122
+msgid "Create"
+msgstr "Erstellen"
+
+#: interface/create.py:127
+msgid ""
+"<span weight=\"bold\">Remaster successful created!!!</span>\n"
+"Finished. A new Remaster was created."
+msgstr ""
+"<span weight=\"bold\">Neues Remaster erstellt!!!</span>\n"
+"Fertig. Ein neues Remaster wurde erstellt."
+
+#: interface/create.py:138
+msgid "Finished"
+msgstr "Fertig"
+
+#: interface/create.py:196
+msgid "Finished..."
+msgstr "Fertig..."
+

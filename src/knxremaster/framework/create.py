@@ -17,8 +17,11 @@
 
 from __future__ import print_function
 
+import collections
+import functools
 import os
 import os.path
+import threading
 
 from knxremaster.framework import utils, cloop
 
@@ -26,68 +29,70 @@ class Create():
     def __init__(self, source, target):
         self.source = source
         self.target = target
-
+        self.handler = {'success': [], 'error': [], 'started': [], 'finished': [self._next], 'update': []}
+        self.tasks = collections.OrderedDict([('mkdir', self.mkdir),
+                                              ('copy', self.copy),
+                                              ('extract', self.extract),
+                                              ('mount', self.mount),
+                                              ('knppix', self.knoppix),
+                                              ('umount', self.umount),
+                                              ('clean', self.clean)])
+        self.current = list(self.tasks.values())
+        
+    def _handle(self, type, *args, **kwargs):
+        for handler in self.handler[type]:
+            handler(*args, **kwargs)  
+    
+    def _connect(self, progress, name):
+        progress.handler['update'].append(functools.partial(self._handle, 'update'))
+        progress.handler['started'].append(functools.partial(self._handle, 'started', name))
+        progress.handler['finished'].append(functools.partial(self._handle, 'finished'))
+        progress.handler['error'].append(lambda *args, **kwargs: print('error!!!'))
+    
+    def _next(self):
+        if len(self.current):
+            threading.Thread(target=self.current.pop(0)).start()
+        else:
+            self._handle('success')
+    
+    def run(self):
+        self._next()
+    
     def mkdir(self):
+        self._handle('started', 'mkdir')
         for path in ['', 'knoppix-mount']:
             path = os.path.join(self.target, path)
             if not os.path.exists(path):
                 os.mkdir(path)
+        self._handle('finished')
                 
     def copy(self):
         copy = utils.copy('-rp', self.source, os.path.join(self.target, 'master'))
-        copy.handler['update'].append(self.update)
-        copy()
+        self._connect(copy, 'copy')
+        copy.start()
         
     def extract(self):
-        source = os.path.join(self.target, 'master', 'KNOPPIX', 'KNOPPIX')
-        target = os.path.join(self.target, 'knoppix.iso')
-        extract = cloop.extract_compressed_fs(source, target)
-        extract.handler['update'].append(self.update)
-        extract()
+        extract = cloop.extract_compressed_fs(os.path.join(self.target, 'master', 'KNOPPIX', 'KNOPPIX'), os.path.join(self.target, 'knoppix.iso'))
+        self._connect(extract, 'extract')
+        extract.start()
     
     def mount(self):
-        source = os.path.join(self.target, 'knoppix.iso')
-        target = os.path.join(self.target, 'knoppix-mount')
-        mount = utils.mount('-r', source, target)
-        mount.handler['update'].append(self.update)
-        mount()
-    
+        mount = utils.mount('-r', os.path.join(self.target, 'knoppix.iso'), os.path.join(self.target, 'knoppix-mount'))
+        self._connect(mount, 'mount')
+        mount.start()
+        
     def knoppix(self):
-        source = os.path.join(self.target, 'knoppix-mount')
-        target = os.path.join(self.target, 'knoppix')
-        copy = utils.copy('-rp', source, target)
-        copy.handler['update'].append(self.update)
-        copy()
+        copy = utils.copy('-rp', os.path.join(self.target, 'knoppix-mount'), os.path.join(self.target, 'knoppix'))
+        self._connect(copy, 'knoppix')
+        copy.start()
     
     def umount(self):
         umount = utils.umount(os.path.join(self.target, 'knoppix-mount'))
-        umount.handler['update'].append(self.update)
-        umount()
+        self._connect(umount, 'umount')
+        umount.start()
     
     def clean(self):
+        self._handle('started', 'clean')
         os.rmdir(os.path.join(self.target, 'knoppix-mount'))
         os.remove(os.path.join(self.target, 'knoppix.iso'))
-    
-    def update(self, percentage, message):
-        print('\r{}%               '.format(percentage), end='')    
-
-if __name__ == '__main__':
-    import sys
-    if len(sys.argv) != 3:
-        print('usage: {} <source> <target>'.format(sys.argv[0]))
-    else:
-        create = Create(sys.argv[1], sys.argv[2])
-        print('MKDIR')
-        create.mkdir()
-        print('COPY')
-        create.copy()
-        print('EXTRACT')
-        create.extract()
-        print('\nMOUNT')
-        create.mount()
-        print('KNOPPIX')
-        create.knoppix()
-        print('UMOUNT')
-        create.umount()
-        print('CLEAN')
-        create.clean()
+        self._handle('finished')
