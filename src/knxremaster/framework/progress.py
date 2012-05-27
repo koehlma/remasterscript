@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function
-
 import functools
+import subprocess
 import threading
 
 class _Progress():
@@ -63,3 +62,19 @@ def progress(function):
         return _Progress(function, args, kwargs)
     functools.update_wrapper(wrapper, function)
     return wrapper
+
+@progress
+def command(progress, command, *arguments):
+    command = [command]
+    command.extend(arguments)
+    process = subprocess.Popen(command)
+    while True:
+        progress.cancel.wait(0.5)
+        if progress.cancel.is_set():
+            break
+        if process.poll() is not None:
+            if process.returncode == 0:
+                break
+            else:
+                progress.error.set()
+                break

@@ -15,21 +15,37 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import functools
+import re
 import subprocess
-import shutil
 
-from sandbox.progress import progress
+from knxremaster.framework.progress import progress, command
 
+mount = functools.partial(command, 'mount')
+
+umount = functools.partial(command, 'umount')
+
+copy = functools.partial(command, 'cp')
+
+remove = functools.partial(command, 'rm')
+
+_MKISOFS_PERCENTAGE = re.compile(r'([0-9]*\.[0-9]*)%\s*done')
 @progress
-def mount(progress, *arguments):
-    command = ['mount']
+def mkisofs(progress, *arguments):
+    command = ['mkisofs']
     command.extend(arguments)
-    if subprocess.call(command) != 0:
-        progress.error.set()
-
-@progress
-def umount(progess, *arguments):
-    command = ['umount']
-    command.extend(arguments)
-    if subprocess.call(command) != 0:
+    process = subprocess.Popen(command, stderr=subprocess.PIPE)
+    progress.update(0)
+    while process.poll() is None:
+        if progress.cancel.is_set():
+            process.kill()
+            process.join()
+            return
+        else:
+            line = process.stderr.readline()
+            match = _MKISOFS_PERCENTAGE.search(line)
+            if match:
+                progress.update(float(match.group(1)))
+    progress.update(100)
+    if process.returncode != 0:
         progress.error.set()

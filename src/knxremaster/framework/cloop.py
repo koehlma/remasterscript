@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function, division
+from __future__ import division
 
 import math
 import os.path
 import struct
 import zlib
 
-from sandbox.progress import progress
+from knxremaster.framework.progress import progress
 
 HEADER = struct.Struct('! 128s I I')
 OFFSET = struct.Struct('! Q')   
@@ -71,5 +71,3 @@ def create_compressed_fs(progress, input, output, block_size=65536, preamble=PRE
         output.seek(len(header))
         for offset in offsets:
             output.write(OFFSET.pack(offset))
-
-extract_compressed_fs('/home/maximilian/Downloads/knoppix/KNOPPIX/KNOPPIX', 'test.iso')()
