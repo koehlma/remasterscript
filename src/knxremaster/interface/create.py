@@ -15,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-#import sys
-#sys.path.append('/home/maximilian/Development/Python/remasterscript/src')
-
 import functools
 import gettext
 import os
@@ -194,11 +191,4 @@ class Create(gtk.Assistant):
             gobject.source_remove(self._pulse)
             self.progress.set_fraction(1)
         self.status.set_text(_('Finished...'))
-        self.set_current_page(2)  
-    
-create = Create()
-create.show_all()
-create.connect('cancel', lambda *args: gtk.main_quit())
-create.connect('close', lambda *args: gtk.main_quit())
-gtk.main()
-
+        self.set_current_page(2)
