@@ -71,3 +71,5 @@ def create_compressed_fs(progress, input, output, block_size=65536, preamble=PRE
         output.seek(len(header))
         for offset in offsets:
             output.write(OFFSET.pack(offset))
+
+extract_compressed_fs('/home/maximilian/Downloads/knoppix/KNOPPIX/KNOPPIX', 'test.iso')()

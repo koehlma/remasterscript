@@ -28,8 +28,9 @@ class _Progress():
         self.started = threading.Event()
         self.finished = threading.Event()
         self.cancel = threading.Event()
+        self.error = threading.Event()
         self.result = None
-        self.handler = {'update': [], 'started': [], 'finished': [], 'canceled': []}
+        self.handler = {'update': [], 'started': [], 'finished': [], 'canceled': [], 'error': []}
     
     def __call__(self):
         self.start()
@@ -44,6 +45,9 @@ class _Progress():
             self.finished.set()
             if self.cancel.is_set():
                 for handler in self.handler['canceled']:
+                    handler()
+            elif self.error.is_set():
+                for handler in self.handler['error']:
                     handler()
             else:
                 for handler in self.handler['finished']:
