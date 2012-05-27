@@ -22,6 +22,8 @@ import os.path
 import struct
 import zlib
 
+from sandbox.progress import progress
+
 HEADER = struct.Struct('! 128s I I')
 OFFSET = struct.Struct('! Q')   
 PREAMBLE = ('#!/bin/sh\n'
@@ -29,15 +31,21 @@ PREAMBLE = ('#!/bin/sh\n'
             'modprobe cloop file=$0 && mount -r -t iso9660 /dev/cloop $1\n'
             'exit $?').encode('ascii')
 
-def extract_compressed_fs(input, output):
+@progress
+def extract_compressed_fs(progress, input, output):
     with open(input, 'rb') as input:
         preamble, block_size, num_blocks = HEADER.unpack(input.read(HEADER.size))
         offsets = [OFFSET.unpack(input.read(OFFSET.size))[0] for i in range(num_blocks + 1)]
+        progress.update(0)
         with open(output, 'wb') as output:
             for i, offset in enumerate(offsets[:-1]):
+                if progress.cancel.is_set():
+                    return
+                progress.update((i + 1) / num_blocks * 100)
                 output.write(zlib.decompress(input.read(offsets[i + 1] - offset)))
 
-def create_compressed_fs(input, output, block_size=65536, preamble=PREAMBLE, level=9):
+@progress
+def create_compressed_fs(progress, input, output, block_size=65536, preamble=PREAMBLE, level=9):
     size = os.path.getsize(input)
     num_blocks = int(math.ceil(size / block_size))
     header = HEADER.pack(preamble, block_size, num_blocks)
@@ -46,8 +54,12 @@ def create_compressed_fs(input, output, block_size=65536, preamble=PREAMBLE, lev
         current = len(header) + OFFSET.size * (num_blocks + 1)
         output.seek(current)
         offsets = [current]
+        progress.update(0)
         with open(input, 'rb') as input:
-            for i in range(num_blocks):
+            for i in range(1, num_blocks + 1):
+                if progress.cancel.is_set():
+                    return
+                progress.update(i / num_blocks * 100)
                 uncompressed = input.read(block_size)
                 if len(uncompressed) < block_size:
                     uncompressed += '\x00' * (block_size - len(uncompressed))
