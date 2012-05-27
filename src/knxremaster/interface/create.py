@@ -50,6 +50,7 @@ class Create(gtk.Assistant):
         gtk.Assistant.__init__(self)
         self.set_title(_('Knoppix Remasterscript'))
         self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.set_icon_from_file(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png'))
         self._setup_page_welcome()
         self._setup_page_create()
         self._setup_page_finished()
