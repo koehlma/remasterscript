@@ -17,7 +17,6 @@
 
 from __future__ import print_function
 
-import collections
 import functools
 import os
 import os.path
@@ -30,14 +29,7 @@ class Create():
         self.source = source
         self.target = target
         self.handler = {'success': [], 'error': [], 'started': [], 'finished': [self._next], 'update': []}
-        self.tasks = collections.OrderedDict([('mkdir', self.mkdir),
-                                              ('copy', self.copy),
-                                              ('extract', self.extract),
-                                              ('mount', self.mount),
-                                              ('knppix', self.knoppix),
-                                              ('umount', self.umount),
-                                              ('clean', self.clean)])
-        self.current = list(self.tasks.values())
+        self.current = [self.mkdir, self.copy, self.extract, self.mount, self.knoppix, self.umount, self.clean]
         
     def _handle(self, type, *args, **kwargs):
         for handler in self.handler[type]:
@@ -77,7 +69,7 @@ class Create():
         extract.start()
     
     def mount(self):
-        mount = utils.mount('-r', os.path.join(self.target, 'knoppix.iso'), os.path.join(self.target, 'knoppix-mount'))
+        mount = utils.mount('-r', '-o', 'loop', os.path.join(self.target, 'knoppix.iso'), os.path.join(self.target, 'knoppix-mount'))
         self._connect(mount, 'mount')
         mount.start()
         
