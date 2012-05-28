@@ -21,7 +21,7 @@ from knxremaster.interface.create import Create
 
 if __name__ == '__main__':
     create = Create()
-    create.show_all()
-    create.connect('cancel', lambda *args: gtk.main_quit())
-    create.connect('close', lambda *args: gtk.main_quit())
+    create.assistant.show_all()
+    create.assistant.connect('cancel', lambda *args: gtk.main_quit())
+    create.assistant.connect('close', lambda *args: gtk.main_quit())
     gtk.main()

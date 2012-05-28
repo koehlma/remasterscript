@@ -64,10 +64,10 @@ def progress(function):
     return wrapper
 
 @progress
-def command(progress, command, *arguments):
+def command(progress, command, *arguments, **kwargs):
     command = [command]
     command.extend(arguments)
-    process = subprocess.Popen(command)
+    process = subprocess.Popen(command, stdin=kwargs.get('stdin', None), stdout=kwargs.get('stdout', None), stderr=kwargs.get('stderr', None), cwd=kwargs.get('cwd', None))
     while True:
         progress.cancel.wait(0.5)
         if progress.cancel.is_set():

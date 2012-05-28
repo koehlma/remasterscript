@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: knxremaster\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-28 00:18+0100\n"
-"PO-Revision-Date: 2012-05-28 00:19+0100\n"
+"POT-Creation-Date: 2012-05-29 00:54+0100\n"
+"PO-Revision-Date: 2012-05-29 00:55+0100\n"
 "Last-Translator: Maximilian Köhl <linuxmaxi@googlemail.com>\n"
 "Language-Team: \n"
 "Language: \n"
@@ -16,39 +16,55 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-SearchPath-0: ./interface\n"
 
-#: interface/create.py:43
+#: interface/create.py:33
 msgid "create directory structure..."
 msgstr "Erstelle Verzeichnis Struktur..."
 
-#: interface/create.py:44
+#: interface/create.py:34
 msgid "copy cd/dvd..."
 msgstr "Kopiere CD/DVD..."
 
-#: interface/create.py:45
+#: interface/create.py:35
 msgid "extract compressed filesytem..."
 msgstr "Entpacke Dateisystem..."
 
-#: interface/create.py:46
+#: interface/create.py:36
 msgid "mount extracted filesystem..."
 msgstr "Mounte entpacktes Dateisystem..."
 
-#: interface/create.py:47
+#: interface/create.py:37
 msgid "copy mounted filesystem..."
 msgstr "Kopiere gemountetes Dateisystem..."
 
-#: interface/create.py:48
+#: interface/create.py:38
 msgid "umount compressed filesystem..."
 msgstr "Umounte komprimiertes Dateisystem..."
 
-#: interface/create.py:49
+#: interface/create.py:39
+msgid "extract minirt..."
+msgstr "Minirt Dekomprimieren..."
+
+#: interface/create.py:40
+msgid "unpack minirt..."
+msgstr "Minirt Entpacken..."
+
+#: interface/create.py:41
+msgid "patching for squashfs..."
+msgstr "Patching für SquashFS..."
+
+#: interface/create.py:42
 msgid "cleanup..."
 msgstr "Aufräumen..."
 
-#: interface/create.py:54
+#: interface/create.py:43
+msgid "write settings..."
+msgstr "Schreibe Einstellungen..."
+
+#: interface/create.py:48
 msgid "Knoppix Remasterscript"
 msgstr "Knoppix Remasterskript"
 
-#: interface/create.py:64
+#: interface/create.py:61
 msgid ""
 "<span weight=\"bold\">Welcome to Knoppix Remasterscript!!!</span>\n"
 "This assistant will guide you through the steps of creating your own Remaster."
@@ -56,21 +72,84 @@ msgstr ""
 "<span weight=\"bold\">Willkommen zum Knoppix Remasterskript!!!</span>\n"
 "Dieser Assistent führt Dich durch die Schritte, die zum Erstellen Deines Remasters erforderlich sind."
 
-#: interface/create.py:67
-#: interface/create.py:82
+#: interface/create.py:64
 msgid "Source"
 msgstr "Quelle"
 
-#: interface/create.py:74
-#: interface/create.py:86
+#: interface/create.py:71
 msgid "Target"
 msgstr "Ziel"
 
-#: interface/create.py:100
+#: interface/create.py:79
+msgid "Source:"
+msgstr "Quelle:"
+
+#: interface/create.py:83
+msgid "Target:"
+msgstr "Ziel:"
+
+#: interface/create.py:97
 msgid "Welcome"
 msgstr "Willkommen"
 
-#: interface/create.py:105
+#: interface/create.py:102
+msgid "My Remaster"
+msgstr "Mein Remaster"
+
+#: interface/create.py:114
+msgid "Name:"
+msgstr "Name:"
+
+#: interface/create.py:118
+msgid "Extract Filesystem:"
+msgstr "Dateisystem Entpacken:"
+
+#: interface/create.py:122
+msgid "Extract Minirt:"
+msgstr "Minirt Entpacken:"
+
+#: interface/create.py:126
+#: interface/create.py:285
+msgid "SquashFS:"
+msgstr "SquashFS:"
+
+#: interface/create.py:139
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: interface/create.py:144
+msgid ""
+"<span weight=\"bold\">Summary!!!</span>\n"
+"Please check if everything is correct."
+msgstr ""
+"<span weight=\"bold\">Zusammenfassung!!!</span>\n"
+"Bitte überprüfe ob alles korrekt ist."
+
+#: interface/create.py:151
+msgid "Cloop"
+msgstr "Cloop"
+
+#: interface/create.py:152
+msgid "SquashFS"
+msgstr "SquashFS"
+
+#: interface/create.py:159
+msgid "Base Version:"
+msgstr "Basis Version:"
+
+#: interface/create.py:163
+msgid "Base Compression:"
+msgstr "Basis Kompression:"
+
+#: interface/create.py:167
+msgid "Options:"
+msgstr "Optionen:"
+
+#: interface/create.py:181
+msgid "Summary"
+msgstr "Zusammenfassung"
+
+#: interface/create.py:187
 msgid ""
 "<span weight=\"bold\">Creating a new Remaster!!!</span>\n"
 "This script is now creating a new Remaster only for you."
@@ -78,11 +157,11 @@ msgstr ""
 "<span weight=\"bold\">Erstelle ein neues Remaster!!!</span>\n"
 "Dieses Skript erstellt nun ein neues Remaster, nur für Dich."
 
-#: interface/create.py:122
+#: interface/create.py:204
 msgid "Create"
 msgstr "Erstellen"
 
-#: interface/create.py:127
+#: interface/create.py:209
 msgid ""
 "<span weight=\"bold\">Remaster successful created!!!</span>\n"
 "Finished. A new Remaster was created."
@@ -90,11 +169,31 @@ msgstr ""
 "<span weight=\"bold\">Neues Remaster erstellt!!!</span>\n"
 "Fertig. Ein neues Remaster wurde erstellt."
 
-#: interface/create.py:138
+#: interface/create.py:220
 msgid "Finished"
 msgstr "Fertig"
 
-#: interface/create.py:196
+#: interface/create.py:273
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: interface/create.py:282
+msgid "Yes"
+msgstr "Ja"
+
+#: interface/create.py:282
+msgid "No"
+msgstr "Nein"
+
+#: interface/create.py:283
+msgid "Filesystem:"
+msgstr "Dateisystem:"
+
+#: interface/create.py:284
+msgid "Minirt:"
+msgstr "Minirt:"
+
+#: interface/create.py:311
 msgid "Finished..."
 msgstr "Fertig..."
 

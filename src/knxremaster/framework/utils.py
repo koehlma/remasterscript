@@ -29,6 +29,10 @@ copy = functools.partial(command, 'cp')
 
 remove = functools.partial(command, 'rm')
 
+gunzip = functools.partial(command, 'gunzip')
+
+cpio = functools.partial(command, 'cpio')
+
 _MKISOFS_PERCENTAGE = re.compile(r'([0-9]*\.[0-9]*)%\s*done')
 @progress
 def mkisofs(progress, *arguments):

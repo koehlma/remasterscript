@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import functools
 import gettext
 import os
 import os.path
@@ -24,37 +23,37 @@ import gobject
 import gtk
 
 from knxremaster.framework.create import Create as Worker
+from knxremaster.framework.versions import get_version
+from knxremaster.interface.decorators import gobject_idle
 
 gobject.threads_init()
-
-def idle(function):
-    def wrapper(*args, **kwargs):
-        def call():
-            function(*args, **kwargs)
-        gobject.idle_add(call)
-    functools.update_wrapper(wrapper, function)
-    return wrapper
 
 _ = gettext.translation('knxremaster', os.path.join(os.path.dirname(__file__), 'locale'), fallback=True).gettext
 
 _task_translation = {'mkdir': _('create directory structure...'),
                      'copy': _('copy cd/dvd...'),
-                     'extract': _('extract compressed filesytem...'),
-                     'mount': _('mount extracted filesystem...'),
-                     'knoppix': _('copy mounted filesystem...'),
-                     'umount': _('umount compressed filesystem...'),
-                     'clean': _('cleanup...')}
+                     'filesystem_extract': _('extract compressed filesytem...'),
+                     'filesystem_mount': _('mount extracted filesystem...'),
+                     'filesystem_knoppix': _('copy mounted filesystem...'),
+                     'filesystem_umount': _('umount compressed filesystem...'),
+                     'minirt_extract': _('extract minirt...'),
+                     'minirt_unpack': _('unpack minirt...'),
+                     'squashfs_patch': _('patching for squashfs...'),
+                     'clean': _('cleanup...'),
+                     'settings': _('write settings...')}
 
-class Create(gtk.Assistant):
+class Create():
     def __init__(self):
-        gtk.Assistant.__init__(self)
-        self.set_title(_('Knoppix Remasterscript'))
-        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
-        self.set_icon_from_file(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png'))
+        self.assistant = gtk.Assistant()
+        self.assistant.set_title(_('Knoppix Remasterscript'))
+        self.assistant.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.assistant.set_icon_from_file(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png'))
+        self.assistant.connect('prepare', self._prepare_page)
         self._setup_page_welcome()
+        self._setup_page_settings()
+        self._setup_page_summary()
         self._setup_page_create()
-        self._setup_page_finished()
-        self.connect('prepare', self._prepare_page)
+        self._setup_page_finished()        
         self._pulse = None
         
     def _setup_page_welcome(self):
@@ -62,14 +61,14 @@ class Create(gtk.Assistant):
         welcome.set_markup(_('<span weight="bold">Welcome to Knoppix Remasterscript!!!</span>\nThis assistant will guide you through the steps of creating your own Remaster.'))
         welcome.set_alignment(0, 0.5)
         
-        self.source = gtk.FileChooserButton(gtk.FileChooserDialog(_('Source'), parent=self,
+        self.source = gtk.FileChooserButton(gtk.FileChooserDialog(_('Source'), parent=self.assistant,
                                                                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                                                   buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK)))
         self.source.set_filename(os.curdir)
         self._source_set = False
         self.source.connect('current-folder-changed', self._source_changed)
         
-        self.target = gtk.FileChooserButton(gtk.FileChooserDialog(_('Target'), parent=self,
+        self.target = gtk.FileChooserButton(gtk.FileChooserDialog(_('Target'), parent=self.assistant,
                                                                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                                                   buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK)))
         self.target.set_filename(os.curdir)
@@ -77,14 +76,14 @@ class Create(gtk.Assistant):
         self.target.connect('current-folder-changed', self._target_changed)
         
         table = gtk.Table(2, 2)
-        label = gtk.Label(_('Source'))
+        label = gtk.Label(_('Source:'))
         label.set_alignment(1, 0.5)
-        table.attach(label, 0, 1, 0, 1, xoptions=gtk.FILL, xpadding=5)
-        table.attach(self.source, 1, 2, 0, 1)
-        label = gtk.Label(_('Target'))
+        table.attach(label, 0, 1, 0, 1, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.source, 1, 2, 0, 1, ypadding=2)
+        label = gtk.Label(_('Target:'))
         label.set_alignment(1, 0.5)
-        table.attach(label, 0, 1, 1, 2, xoptions=gtk.FILL, xpadding=5)
-        table.attach(self.target, 1, 2, 1, 2)
+        table.attach(label, 0, 1, 1, 2, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.target, 1, 2, 1, 2, ypadding=2)
         
         box = gtk.VBox()
         box.pack_start(welcome, False, False, 5)
@@ -94,9 +93,94 @@ class Create(gtk.Assistant):
         self.welcome.add(box)
         self.welcome.set_padding(5, 5, 5, 5)
 
-        self.append_page(self.welcome)
-        self.set_page_title(self.welcome, _('Welcome'))
-        self.set_page_type(self.welcome, gtk.ASSISTANT_PAGE_INTRO)
+        self.assistant.append_page(self.welcome)
+        self.assistant.set_page_title(self.welcome, _('Welcome'))
+        self.assistant.set_page_type(self.welcome, gtk.ASSISTANT_PAGE_INTRO)
+    
+    def _setup_page_settings(self):
+        self.name = gtk.Entry()
+        self.name.set_text(_('My Remaster'))
+        
+        self.filesystem = gtk.CheckButton()
+        self.filesystem.set_active(True)
+        
+        self.minirt = gtk.CheckButton()
+        self.minirt.set_active(True)
+        
+        self.squashfs = gtk.CheckButton()
+        self.squashfs.connect('toggled', self._squashfs_changed)
+        
+        table = gtk.Table(4, 2)
+        label = gtk.Label(_('Name:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 0, 1, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.name, 1, 2, 0, 1, ypadding=2)
+        label = gtk.Label(_('Extract Filesystem:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 1, 2, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.filesystem, 1, 2, 1, 2, ypadding=2)
+        label = gtk.Label(_('Extract Minirt:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 2, 3, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.minirt, 1, 2, 2, 3, ypadding=2)
+        label = gtk.Label(_('SquashFS:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 3, 4, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.squashfs, 1, 2, 3, 4, ypadding=2)
+
+        box = gtk.VBox()
+        box.pack_start(table, False, False, 5)               
+        
+        self.settings = gtk.Alignment(1, 1, 1, 1)
+        self.settings.add(box)
+        self.settings.set_padding(5, 5, 5, 5)
+
+        self.assistant.append_page(self.settings)
+        self.assistant.set_page_title(self.settings, _('Settings'))
+        self.assistant.set_page_complete(self.settings, True)
+    
+    def _setup_page_summary(self):
+        summary = gtk.Label()
+        summary.set_markup(_('<span weight="bold">Summary!!!</span>\nPlease check if everything is correct.'))
+        summary.set_alignment(0, 0.5)
+
+        self.base_version = gtk.Label()
+        self.base_version.set_alignment(0, 0.5)
+        
+        self.base_compression = gtk.combo_box_new_text()
+        self.base_compression.append_text(_('Cloop'))
+        self.base_compression.append_text(_('SquashFS'))
+        self.base_compression.set_sensitive(False)
+        
+        self.options = gtk.Label()
+        self.options.set_alignment(0, 0.5)
+               
+        table = gtk.Table(3, 2)
+        label = gtk.Label(_('Base Version:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 0, 1, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.base_version, 1, 2, 0, 1, ypadding=2)
+        label = gtk.Label(_('Base Compression:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 1, 2, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.base_compression, 1, 2, 1, 2, ypadding=2)
+        label = gtk.Label(_('Options:'))
+        label.set_alignment(1, 0.5)
+        table.attach(label, 0, 1, 2, 3, xoptions=gtk.FILL, xpadding=5, ypadding=2)
+        table.attach(self.options, 1, 2, 2, 3, ypadding=2)
+
+        box = gtk.VBox()
+        box.pack_start(summary, False, False, 5)
+        box.pack_start(table, False, False, 5)               
+                
+        self.summary = gtk.Alignment(1, 1, 1, 1)
+        self.summary.add(box)
+        self.summary.set_padding(5, 5, 5, 5)
+
+        self.assistant.append_page(self.summary)
+        self.assistant.set_page_title(self.summary, _('Summary'))
+        self.assistant.set_page_complete(self.summary, True)
+        self.assistant.set_page_type(self.summary, gtk.ASSISTANT_PAGE_CONFIRM)
     
     def _setup_page_create(self):
         create = gtk.Label()
@@ -116,9 +200,9 @@ class Create(gtk.Assistant):
         self.create.add(box)
         self.create.set_padding(5, 5, 5, 5)
         
-        self.append_page(self.create)
-        self.set_page_title(self.create, _('Create'))
-        self.set_page_type(self.create, gtk.ASSISTANT_PAGE_PROGRESS)
+        self.assistant.append_page(self.create)
+        self.assistant.set_page_title(self.create, _('Create'))
+        self.assistant.set_page_type(self.create, gtk.ASSISTANT_PAGE_PROGRESS)
     
     def _setup_page_finished(self):
         finished = gtk.Label()
@@ -132,9 +216,9 @@ class Create(gtk.Assistant):
         self.finished.add(box)
         self.finished.set_padding(5, 5, 5, 5)
         
-        self.append_page(self.finished)
-        self.set_page_title(self.finished, _('Finished'))
-        self.set_page_type(self.finished, gtk.ASSISTANT_PAGE_SUMMARY)
+        self.assistant.append_page(self.finished)
+        self.assistant.set_page_title(self.finished, _('Finished'))
+        self.assistant.set_page_type(self.finished, gtk.ASSISTANT_PAGE_SUMMARY)
     
     def _source_changed(self, filechooser):
         if os.path.exists(os.path.join(self.source.get_filename(), 'KNOPPIX', 'KNOPPIX')):
@@ -150,34 +234,67 @@ class Create(gtk.Assistant):
         else:
             self._target_set = False
     
+    def _squashfs_changed(self, checkbutton):
+        if self.squashfs.get_active():
+            self.filesystem.set_active(True)
+            self.filesystem.set_sensitive(False)
+            self.minirt.set_active(True)
+            self.minirt.set_sensitive(False)
+        else:
+            self.filesystem.set_sensitive(True)
+            self.minirt.set_sensitive(True)
+    
     def _welcome_check(self):
         if self._source_set and self._target_set:
-            self.set_page_complete(self.welcome, True)
+            self.assistant.set_page_complete(self.welcome, True)
         else:
-            self.set_page_complete(self.welcome, False)
+            self.assistant.set_page_complete(self.welcome, False)
     
     def _prepare_page(self, assistant, page):
         if page == self.create:
             self._create()
+        elif page == self.summary:
+            self._summary()
     
     def _create(self):
-        worker = Worker(self.source.get_filename(), self.target.get_filename())
+        worker = Worker(self.source.get_filename(), self.target.get_filename(),
+                        self.name.get_text(), self.filesystem.get_active(),
+                        self.minirt.get_active(), self.squashfs.get_active(),
+                        'cloop' if self.base_compression.get_active() == 0 else 'squashfs',
+                        self.base_version.get_text())
         worker.handler['started'].append(self._task_started)
         worker.handler['update'].append(self._task_update)
         worker.handler['success'].append(self._create_success)
         worker.run()
     
+    def _summary(self):
+        name, squashfs = get_version(self.source.get_filename())
+        if name == 'Unknown':
+            name = _('Unknown')
+        self.base_version.set_text(name)
+        if squashfs is None:
+            self.base_compression.set_active(0)
+            self.base_compression.set_sensitive(True)
+        elif squashfs is True:
+            self.base_compression.set_active(1)
+        else:
+            self.base_compression.set_active(0)
+        _yes_no = {True: _('Yes'), False: _('No')}
+        self.options.set_text('{} {} | {} {} | {} {}'.format(_('Filesystem:'), _yes_no[self.filesystem.get_active()],
+                                                             _('Minirt:'), _yes_no[self.minirt.get_active()],
+                                                             _('SquashFS:'), _yes_no[self.squashfs.get_active()]))
+    
     def _task_pulse(self):
         self.progress.pulse()
         return True
     
-    @idle
+    @gobject_idle
     def _task_started(self, name):
         if self._pulse is None:
             self._pulse = gobject.timeout_add(100, self._task_pulse)
         self.status.set_text(_task_translation[name])
     
-    @idle
+    @gobject_idle
     def _task_update(self, percentage, message):
         if self._pulse is None:
             self.progress.set_fraction(percentage / 100)
@@ -185,11 +302,11 @@ class Create(gtk.Assistant):
             gobject.source_remove(self._pulse)
             self._pulse = None
     
-    @idle
+    @gobject_idle
     def _create_success(self):
-        self.set_page_complete(self.create, True)
+        self.assistant.set_page_complete(self.create, True)
         if self._pulse is not None:
             gobject.source_remove(self._pulse)
             self.progress.set_fraction(1)
         self.status.set_text(_('Finished...'))
-        self.set_current_page(2)
+        self.assistant.set_current_page(4)
