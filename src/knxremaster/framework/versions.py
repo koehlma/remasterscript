@@ -19,7 +19,8 @@ import hashlib
 import json
 import os.path
 
-versions = {'18a1728dfe7a6a23238c42ff46ff7fbf021e7b5b': 'Knoppix 6.7.1 CD-2011-09-14-DE'}
+versions = {'18a1728dfe7a6a23238c42ff46ff7fbf021e7b5b': 'Knoppix 6.7.1 CD-2011-09-14-DE',
+            'bfec82fe9d789ed157f666312fa26ba2cb85048f': 'Knoppix 6.7.1 DVD-2011-09-14-DE'}
 
 def get_version(source):
     if os.path.exists(os.path.join(source, 'KNOPPIX', 'remaster.info')):
