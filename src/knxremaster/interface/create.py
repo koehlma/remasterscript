@@ -280,9 +280,9 @@ class Create():
         else:
             self.base_compression.set_active(0)
         _yes_no = {True: _('Yes'), False: _('No')}
-        self.options.set_text('{} {} | {} {} | {} {}'.format(_('Filesystem:'), _yes_no[self.filesystem.get_active()],
-                                                             _('Minirt:'), _yes_no[self.minirt.get_active()],
-                                                             _('SquashFS:'), _yes_no[self.squashfs.get_active()]))
+        self.options.set_text('%s %s | %s %s | %s %s' % (_('Filesystem:'), _yes_no[self.filesystem.get_active()],
+                                                         _('Minirt:'), _yes_no[self.minirt.get_active()],
+                                                         _('SquashFS:'), _yes_no[self.squashfs.get_active()]))
     
     def _task_pulse(self):
         self.progress.pulse()
