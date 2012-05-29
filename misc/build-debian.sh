@@ -15,6 +15,8 @@ if [ $? = 0 ]; then
 	cp ./misc/create_compressed_fs.static ./debian/opt/remasterscript/bin/create_compressed_fs
 	cp ./misc/debian.control ./debian/DEBIAN/control
 	cp ./misc/remasterscript ./debian/usr/bin/
+	cp ./misc/remaster-create ./debian/usr/bin/
+	cp ./misc/remaster-build ./debian/usr/bin/
 	dpkg -b debian/ remasterscript.deb
 else
 	echo "You have to install dpkg..."

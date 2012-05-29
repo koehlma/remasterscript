@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /opt/remasterscript/share/
+gksudo python remaster-create.py
