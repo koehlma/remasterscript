@@ -5,6 +5,6 @@ Priority: extra
 Architecture: i386
 Depends: qemu, coreutils, mount, mkisofs, bash, xterm, python, python-gtk2, gksu
 Installed-Size: 4000
-Maintainer: maxi_king_333 
-Homepage: 
+Maintainer: maxi_king_333
+Homepage:
 Description: Knoppix-Remaster-Skript
