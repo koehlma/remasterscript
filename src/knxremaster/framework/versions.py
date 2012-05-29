@@ -19,18 +19,18 @@ import hashlib
 import json
 import os.path
 
-versions = {'18a1728dfe7a6a23238c42ff46ff7fbf021e7b5b': {'name': 'Knoppix 6.7.1 CD-2011-09-14-DE', 'squashfs': False}}
+versions = {'18a1728dfe7a6a23238c42ff46ff7fbf021e7b5b': 'Knoppix 6.7.1 CD-2011-09-14-DE'}
 
 def get_version(source):
     if os.path.exists(os.path.join(source, 'KNOPPIX', 'remaster.info')):
         with open(os.path.join(source, 'KNOPPIX', 'remaster.info')) as input:
             info = json.load(input)
-            return info['name'], info['squashfs']
+            return info['name'], info['squashfs'], info['base']
     elif os.path.exists(os.path.join(source, 'KNOPPIX', 'sha1sums')):
         with open(os.path.join(source, 'KNOPPIX', 'sha1sums')) as input:
             hash = hashlib.sha1(input.read()).hexdigest()
             if hash in versions:
-                return versions[hash]['name'], versions[hash]['squashfs']
-    return 'Unknown', None
+                return versions[hash], False, 'Unknown'
+    return 'Unknown', None, 'Unknown'
         
         

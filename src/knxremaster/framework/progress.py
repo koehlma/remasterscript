@@ -28,6 +28,7 @@ class _Progress():
         self.finished = threading.Event()
         self.cancel = threading.Event()
         self.error = threading.Event()
+        self.checkpoint = threading.Event()
         self.result = None
         self.handler = {'update': [], 'started': [], 'finished': [], 'canceled': [], 'error': []}
     
@@ -67,14 +68,15 @@ def progress(function):
 def command(progress, command, *arguments, **kwargs):
     command = [command]
     command.extend(arguments)
-    process = subprocess.Popen(command, stdin=kwargs.get('stdin', None), stdout=kwargs.get('stdout', None), stderr=kwargs.get('stderr', None), cwd=kwargs.get('cwd', None))
+    progress.process = subprocess.Popen(command, stdin=kwargs.get('stdin', None), stdout=kwargs.get('stdout', None), stderr=kwargs.get('stderr', None), cwd=kwargs.get('cwd', None))
+    progress.checkpoint.set()
     while True:
         progress.cancel.wait(0.5)
         if progress.cancel.is_set():
             break
-        if process.poll() is not None:
-            if process.returncode == 0:
+        if progress.process.poll() is not None:
+            if progress.process.returncode == 0:
                 break
             else:
-                progress.error.set()
+                progress.progress.error.set()
                 break

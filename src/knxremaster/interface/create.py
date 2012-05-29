@@ -268,7 +268,7 @@ class Create():
         worker.run()
     
     def _summary(self):
-        name, squashfs = get_version(self.source.get_filename())
+        name, squashfs, base = get_version(self.source.get_filename())
         if name == 'Unknown':
             name = _('Unknown')
         self.base_version.set_text(name)

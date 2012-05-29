@@ -33,6 +33,8 @@ gunzip = functools.partial(command, 'gunzip')
 
 cpio = functools.partial(command, 'cpio')
 
+gzip = functools.partial(command, 'gzip')
+
 _MKISOFS_PERCENTAGE = re.compile(r'([0-9]*\.[0-9]*)%\s*done')
 @progress
 def mkisofs(progress, *arguments):
