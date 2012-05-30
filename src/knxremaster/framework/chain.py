@@ -31,10 +31,10 @@ class Chain():
             self.emit('success')
     
     def connect(self, progress, name):
-        progress.handler['update'].append(functools.partial(self.emit, 'update'))
-        progress.handler['started'].append(functools.partial(self.emit, 'started', name))
-        progress.handler['finished'].append(functools.partial(self.emit, 'finished'))
-        progress.handler['error'].append(lambda *args, **kwargs: print('error!!!'))
+        progress.connect('update', self.emit, 'update')
+        progress.connect('started', self.emit, 'started', name)
+        progress.connect('finished', self.emit, 'finished')
+        progress.connect('error', lambda *args, **kwargs: print('error!!!'))
     
     def run(self):
         self._next()

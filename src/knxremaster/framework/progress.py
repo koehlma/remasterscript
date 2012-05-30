@@ -19,8 +19,11 @@ import functools
 import subprocess
 import threading
 
-class _Progress():
+from knxremaster.framework.handling import Events
+
+class _Progress(Events):
     def __init__(self, function, args, kwargs):
+        Events.__init__(self)
         self.function = function
         self.args = args
         self.kwargs = kwargs
@@ -30,8 +33,7 @@ class _Progress():
         self.error = threading.Event()
         self.checkpoint = threading.Event()
         self.result = None
-        self.handler = {'update': [], 'started': [], 'finished': [], 'canceled': [], 'error': []}
-    
+            
     def __call__(self):
         self.start()
         self.finished.wait()
@@ -39,19 +41,15 @@ class _Progress():
     def start(self):
         self.started.set()
         def call():
-            for handler in self.handler['started']:
-                handler()
+            self.emit('started')
             self.result = self.function(self, *self.args, **self.kwargs)
             self.finished.set()
             if self.cancel.is_set():
-                for handler in self.handler['canceled']:
-                    handler()
+                self.emit('canceled')
             elif self.error.is_set():
-                for handler in self.handler['error']:
-                    handler()
+                self.emit('error')
             else:
-                for handler in self.handler['finished']:
-                    handler()
+                self.emit('finished')
         threading.Thread(target=call).start()        
     
     def update(self, percentage, message=None):
