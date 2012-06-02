@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import json
 import os
 import os.path
@@ -52,11 +54,42 @@ def create(script, source, target, name='Unknown', filesystem=True, minirt=True,
     yield 'copy_master', commands.copy('-rp', source, os.path.join(target, 'master'))
     yield 'write_settings', write_settings()
     if filesystem:
-        yield 'filesystem_extract', cloop.extract_compressed_fs(os.path.join(target, 'master', 'KNOPPIX', 'KNOPPIX'), os.path.join(target, 'knoppix.iso'))
+        yield 'filesystem_decompress', cloop.extract_compressed_fs(os.path.join(target, 'master', 'KNOPPIX', 'KNOPPIX'), os.path.join(target, 'knoppix.iso'))
         yield 'filesystem_mount', commands.mount('-r', '-o', 'loop', os.path.join(target, 'knoppix.iso'), os.path.join(target, 'knoppix-mount'))
         yield 'filesystem_copy', commands.copy('-rp', os.path.join(target, 'knoppix-mount'), os.path.join(target, 'knoppix'))
         yield 'filesystem_umount', commands.umount(os.path.join(target, 'knoppix-mount'))
     if minirt:
-        yield 'minirt_extract', commands.gunzip(os.path.join(target, 'master', 'boot', 'isolinux', 'minirt.gz'))
+        yield 'minirt_decompress', commands.gunzip(os.path.join(target, 'master', 'boot', 'isolinux', 'minirt.gz'))
         yield 'minirt_unpack', commands.cpio('-imd', '--no-absolute-filenames', stdin=open(os.path.join(target, 'master', 'boot', 'isolinux', 'minirt'), 'rb'), cwd=os.path.join(target, 'minirt'))
     yield 'cleanup', cleanup()
+
+if __name__ == '__main__':
+    import argparse
+    import sys
+    
+    if os.getuid() != 0:
+        sys.exit('This script requires root access!')
+        
+    _steps = {'create_directories': 'creating target directory structure...',
+              'copy_master': 'copying cd/dvd...',
+              'write_settings': 'writing settings...',
+              'filesystem_extract': 'decompressing filesystem...',
+              'filesystem_mount': 'mounting decompressed filesystem...',
+              'filesystem_copy': 'copying filesystem...',
+              'filesystem_umount': 'umounting decompressed filesystem',
+              'minirt_extract': 'decompressing minirt...',
+              'minirt_unpack': 'unpacking decompressed minirt...',
+              'cleanup': 'cleaning up...'}
+    
+    def main_create(arguments):
+        _create = create(arguments.source, arguments.target, arguments.name, arguments.nofilesystem, arguments.nominirt, arguments.squashfs)
+        _create(_steps)
+         
+    parser = argparse.ArgumentParser()
+    parser.add_argument('source', help='mounted knoppix cd/dvd')
+    parser.add_argument('target', help='target path for unpacking knoppix')
+    parser.add_argument('--name', default='Unknown', help='name of the remaster')
+    parser.add_argument('--nofilesystem', action='store_false', help='do not extract filesystem')
+    parser.add_argument('--nominirt', action='store_false', help='do not extract minirt')
+    parser.add_argument('--squashfs', action='store_true', help='patch knoppix to use squashfs')
+    main_create(parser.parse_args())

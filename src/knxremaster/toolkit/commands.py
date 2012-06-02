@@ -39,11 +39,11 @@ if os.name == 'posix':
     
     gzip = functools.partial(command, 'gzip')
     
-    zip7g = functools.partial(command, '7zG')
+    zip7 = functools.partial(command, '7z')
     
     _mkisofs = 'mkisofs'    
 elif os.name == 'nt':
-    zip7g = functools.partial(command, os.path.join(os.path.dirname(__file__), '7zip', '7zG.exe'))
+    zip7 = functools.partial(command, os.path.join(os.path.dirname(__file__), '7zip', '7z.exe'))
     
     _mkisofs = os.path.join(os.path.dirname(__file__), 'mkisofs', 'mkisofs.exe')
     
@@ -56,7 +56,6 @@ def mkisofs(progress, *arguments):
             return
         else:
             line = process.stderr.readline()
-            print line
             match = _MKISOFS_PERCENTAGE.search(line)
             if match:
                 progress.update(float(match.group(1)))

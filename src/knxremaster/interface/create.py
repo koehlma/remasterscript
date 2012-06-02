@@ -32,11 +32,11 @@ _ = gettext.translation('knxremaster', os.path.join(os.path.dirname(__file__), '
 
 _task_translation = {'create_directories': _('create directory structure...'),
                      'copy_master': _('copy cd/dvd...'),
-                     'filesystem_extract': _('extract compressed filesytem...'),
+                     'filesystem_decompress': _('extract compressed filesytem...'),
                      'filesystem_mount': _('mount extracted filesystem...'),
                      'filesystem_copy': _('copy mounted filesystem...'),
                      'filesystem_umount': _('umount compressed filesystem...'),
-                     'minirt_extract': _('extract minirt...'),
+                     'minirt_decompress': _('extract minirt...'),
                      'minirt_unpack': _('unpack minirt...'),
                      'squashfs_patch': _('patching for squashfs...'),
                      'cleanup': _('cleanup...'),

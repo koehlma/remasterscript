@@ -15,8 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import functools
 import subprocess
+import traceback
 
 from knxremaster.toolkit.asynchron import ConditionsEvents, thread_exec
 
@@ -40,7 +43,11 @@ class _Progress(ConditionsEvents):
         def call():
             self.condition('start').activate()
             self.event('start').emit()
-            self.result = self.function(self, *self.args, **self.kwargs)
+            try:
+                self.result = self.function(self, *self.args, **self.kwargs)
+            except:
+                traceback.print_exc()
+                self.condition('error').activate()
             self.condition('finish').activate()
             if self.condition('cancel'):
                 self.event('cancel').emit()
@@ -67,8 +74,23 @@ class _Script(ConditionsEvents):
         self.kwargs = kwargs
         self.progress = None
     
-    def __call__(self):
-        self.start()
+    def __call__(self, steps={}):
+        def start(name, progress):
+            if name in steps:
+                print(steps[name])
+            else:
+                print(name)
+        
+        def update(name, percentage, message=None):
+            print('\r%i%%' % (percentage), end='')
+        
+        def finish(name, progress):
+            print()
+        
+        self.event('start').connect(start)
+        self.event('update').connect(update)
+        self.event('finish').connect(finish)  
+        self.start()        
         self.condition('finish').wait()
     
     def cancel(self):
@@ -79,23 +101,26 @@ class _Script(ConditionsEvents):
     def start(self):
         @thread_exec
         def call():
-            for name, progress in self.function(self, *self.args, **self.kwargs):
-                def update(percentage, message=None):
-                    self.event('update').emit(name, percentage, message)
-                self.progress = progress
-                self.progress.event('update').connect(update)
-                self.event('start').emit(name, self.progress)
-                if self.condition('cancel'):
-                    break
-                self.progress()
-                if progress.condition('cancel'):
-                    self.condition('cancel').activate()
-                    break
-                elif progress.condition('error'):
-                    self.condition('error').activate()
-                    self.error = name
-                    break
-                self.event('finish').emit(name, self.progress)
+            try:
+                for name, progress in self.function(self, *self.args, **self.kwargs):
+                    self.progress = progress
+                    self.progress.event('update').connect(functools.partial(self.event('update').emit, name))
+                    self.event('start').emit(name, self.progress)
+                    if self.condition('cancel'):
+                        break
+                    self.progress()
+                    if progress.condition('cancel'):
+                        self.condition('cancel').activate()
+                        break
+                    elif progress.condition('error'):
+                        self.condition('error').activate()
+                        self.error = name
+                        break
+                    self.event('finish').emit(name, self.progress)
+            except:
+                traceback.print_exc()
+                self.condition('error').activate()
+            self.condition('finish').activate()
             if self.condition('cancel'):
                 self.event('cancel').emit()
             elif self.condition('error'):
