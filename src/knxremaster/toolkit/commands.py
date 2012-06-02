@@ -40,12 +40,16 @@ if os.name == 'posix':
     gzip = functools.partial(command, 'gzip')
     
     zip7g = functools.partial(command, '7zG')
+    
+    _mkisofs = 'mkisofs'    
 elif os.name == 'nt':
     zip7g = functools.partial(command, os.path.join(os.path.dirname(__file__), '7zip', '7zG.exe'))
-
+    
+    _mkisofs = os.path.join(os.path.dirname(__file__), 'mkisofs', 'mkisofs.exe')
+    
 @progress
 def mkisofs(progress, *arguments):
-    process = subprocess.Popen(['mkisofs'] + list(arguments), stderr=subprocess.PIPE)
+    process = subprocess.Popen(_mkisofs + list(arguments), stderr=subprocess.PIPE)
     while process.poll() is None:
         if progress.condition('cancel'):
             process.kill()
