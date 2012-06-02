@@ -22,13 +22,13 @@ from knxremaster.toolkit import commands
 from knxremaster.toolkit.progress import script, progress
 
 @script
-def unpack(script, source, target):
+def unpack(script, source, target, graphic_interface=False):
     @progress
     def cleanup(progress):
         if os.path.exists(os.path.join(target, '[BOOT]')):
             shutil.rmtree(os.path.join(target, '[BOOT]'))
             
-    yield 'unpack', commands.zip7('x', '-o%s' % (target), source)
+    yield 'unpack', (commands.zip7g if graphic_interface else commands.zip7)('x', '-o%s' % (target), source)
     yield 'cleanup', cleanup()
 
 @script

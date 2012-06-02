@@ -41,9 +41,13 @@ if os.name == 'posix':
     
     zip7 = functools.partial(command, '7z')
     
+    zip7g = functools.partial(command, '7zG')
+    
     _mkisofs = 'mkisofs'    
 elif os.name == 'nt':
     zip7 = functools.partial(command, os.path.join(os.path.dirname(__file__), '7zip', '7z.exe'))
+    
+    zip7g = functools.partial(command, os.path.join(os.path.dirname(__file__), '7zip', '7zG.exe'))
     
     _mkisofs = os.path.join(os.path.dirname(__file__), 'mkisofs', 'mkisofs.exe')
     
