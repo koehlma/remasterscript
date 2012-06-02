@@ -6,15 +6,9 @@ if [ $? = 0 ]; then
 	fi
 	mkdir -p ./debian/DEBIAN/
 	mkdir -p ./debian/opt/remasterscript/{bin,share}
-	mkdir -p ./debian/usr/share/{pixmaps,applications}/
 	mkdir -p ./debian/usr/bin
 	cp -rp ./src/* debian/opt/remasterscript/share/
-	cp ./icon/icon.png ./debian/usr/share/pixmaps/remasterscript.png
-	cp ./misc/remasterscript.desktop ./debian/usr/share/applications
-	cp ./misc/extract_compressed_fs.static ./debian/opt/remasterscript/bin/extract_compressed_fs
-	cp ./misc/create_compressed_fs.static ./debian/opt/remasterscript/bin/create_compressed_fs
 	cp ./misc/debian.control ./debian/DEBIAN/control
-	cp ./misc/remasterscript ./debian/usr/bin/
 	cp ./misc/remaster-create ./debian/usr/bin/
 	cp ./misc/remaster-build ./debian/usr/bin/
 	dpkg -b debian/ remasterscript.deb
