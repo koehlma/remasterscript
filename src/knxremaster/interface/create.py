@@ -226,6 +226,7 @@ class Create():
             self._welcome_check()
         else:
             self._source_set = False
+            self._welcome_check()
     
     def _target_changed(self, filechooser):
         if len(os.listdir(self.target.get_filename())) == 0:
@@ -233,6 +234,7 @@ class Create():
             self._welcome_check()
         else:
             self._target_set = False
+            self._welcome_check()
     
     def _squashfs_changed(self, checkbutton):
         if self.squashfs.get_active():

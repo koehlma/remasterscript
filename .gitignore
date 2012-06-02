@@ -9,3 +9,8 @@ debian
 .pydevproject
 .settings
 
+# dolphin
+.directory
+
+# knoppix
+.iso

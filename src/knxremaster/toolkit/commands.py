@@ -16,6 +16,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 import functools
+import os
 import re
 import subprocess
 
@@ -23,19 +24,24 @@ from knxremaster.toolkit.progress import progress, command
 
 _MKISOFS_PERCENTAGE = re.compile(r'([0-9]*\.[0-9]*)%\s*done')
 
-mount = functools.partial(command, 'mount')
-
-umount = functools.partial(command, 'umount')
-
-copy = functools.partial(command, 'cp')
-
-remove = functools.partial(command, 'rm')
-
-gunzip = functools.partial(command, 'gunzip')
-
-cpio = functools.partial(command, 'cpio')
-
-gzip = functools.partial(command, 'gzip')
+if os.name == 'posix':
+    mount = functools.partial(command, 'mount')
+    
+    umount = functools.partial(command, 'umount')
+    
+    copy = functools.partial(command, 'cp')
+    
+    remove = functools.partial(command, 'rm')
+    
+    gunzip = functools.partial(command, 'gunzip')
+    
+    cpio = functools.partial(command, 'cpio')
+    
+    gzip = functools.partial(command, 'gzip')
+    
+    zip7g = functools.partial(command, '7zG')
+elif os.name == 'nt':
+    zip7g = functools.partial(command, os.path.join(os.path.dirname(__file__), '7zip', '7zG.exe'))
 
 @progress
 def mkisofs(progress, *arguments):
