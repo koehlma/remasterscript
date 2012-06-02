@@ -49,13 +49,14 @@ elif os.name == 'nt':
     
 @progress
 def mkisofs(progress, *arguments):
-    process = subprocess.Popen(_mkisofs + list(arguments), stderr=subprocess.PIPE)
+    process = subprocess.Popen([_mkisofs] + list(arguments), stderr=subprocess.PIPE)
     while process.poll() is None:
         if progress.condition('cancel'):
             process.kill()
             return
         else:
             line = process.stderr.readline()
+            print line
             match = _MKISOFS_PERCENTAGE.search(line)
             if match:
                 progress.update(float(match.group(1)))

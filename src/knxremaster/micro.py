@@ -28,5 +28,9 @@ def unpack(script, source, target):
         if os.path.exists(os.path.join(target, '[BOOT]')):
             shutil.rmtree(os.path.join(target, '[BOOT]'))
             
-    yield 'unpack_iso', commands.zip7g('x', '-o%s' % (target), source)
+    yield 'unpack', commands.zip7g('x', '-o%s' % (target), source)
     yield 'cleanup', cleanup()
+
+@script
+def pack(script, source, target):
+    yield 'pack', commands.mkisofs('-pad', '-l', '-r', '-J', '-v', '-V', 'KNOPPIX', '-no-emul-boot', '-boot-load-size', '4', '-boot-info-table', '-b', 'boot/isolinux/isolinux.bin', '-c', 'boot/isolinux/boot.cat', '-hide-rr-moved', '-o', target, source)
