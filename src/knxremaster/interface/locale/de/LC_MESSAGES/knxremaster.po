@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: knxremaster\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-05-29 22:47+0100\n"
-"PO-Revision-Date: 2012-05-29 22:48+0100\n"
+"PO-Revision-Date: 2012-06-02 14:47+0100\n"
 "Last-Translator: Maximilian Köhl <linuxmaxi@googlemail.com>\n"
 "Language-Team: \n"
 "Language: \n"
@@ -30,7 +30,7 @@ msgstr "Komprimiere Dateisystemimage..."
 
 #: interface/build.py:36
 msgid "collect files for minirt..."
-msgstr ""
+msgstr "Sammle Dateien für Minirt..."
 
 #: interface/build.py:37
 msgid "create minirt image..."

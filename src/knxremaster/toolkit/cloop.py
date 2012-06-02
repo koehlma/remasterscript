@@ -22,52 +22,49 @@ import os.path
 import struct
 import zlib
 
-from knxremaster.framework.progress import progress
+from knxremaster.toolkit.progress import progress
 
 HEADER = struct.Struct('! 128s I I')
 OFFSET = struct.Struct('! Q')   
-PREAMBLE = ('#!/bin/sh\n'
-            '#V2.0 Format\n'
-            'modprobe cloop file=$0 && mount -r -t iso9660 /dev/cloop $1\n'
-            'exit $?').encode('ascii')
+PREAMBLE = ('#!/bin/sh\n#V2.0 Format\nmodprobe cloop file=$0 && mount -r -t iso9660 /dev/cloop $1\nexit $?').encode('ascii')
 
 @progress
-def extract_compressed_fs(progress, input, output):
-    with open(input, 'rb') as input:
-        preamble, block_size, num_blocks = HEADER.unpack(input.read(HEADER.size))
-        offsets = [OFFSET.unpack(input.read(OFFSET.size))[0] for i in range(num_blocks + 1)]
+def extract_compressed_fs(progress, source, target):
+    with open(source, 'rb') as source:
+        num_blocks = HEADER.unpack(source.read(HEADER.size))[2]
+        offsets = [OFFSET.unpack(source.read(OFFSET.size))[0] for i in range(num_blocks + 1)]
         progress.update(0)
-        with open(output, 'wb') as output:
+        with open(target, 'wb') as target:
             for i, offset in enumerate(offsets[:-1]):
-                if progress.cancel.is_set():
+                if progress.condition('cancel'):
                     return
                 progress.update((i + 1) / num_blocks * 100)
-                output.write(zlib.decompress(input.read(offsets[i + 1] - offset)))
+                target.write(zlib.decompress(source.read(offsets[i + 1] - offset)))
 
 @progress
-def create_compressed_fs(progress, input, output, block_size=65536, preamble=PREAMBLE, level=9):
-    size = os.path.getsize(input)
+def create_compressed_fs(progress, source, target, block_size=65536, preamble=PREAMBLE, level=9):
+    size = os.path.getsize(source)
     num_blocks = int(math.ceil(size / block_size))
     header = HEADER.pack(preamble, block_size, num_blocks)
-    with open(output, 'wb') as output:
-        output.write(header)
+    with open(target, 'wb') as target:
+        target.write(header)
         current = len(header) + OFFSET.size * (num_blocks + 1)
-        output.seek(current)
+        target.seek(current)
         offsets = [current]
         progress.update(0)
-        with open(input, 'rb') as input:
+        with open(source, 'rb') as source:
             for i in range(1, num_blocks + 1):
-                if progress.cancel.is_set():
+                if progress.condition('cancel'):
                     return
                 progress.update(i / num_blocks * 100)
-                uncompressed = input.read(block_size)
+                uncompressed = source.read(block_size)
                 if len(uncompressed) < block_size:
                     uncompressed += '\x00' * (block_size - len(uncompressed))
                 assert len(uncompressed) == block_size
                 compressed = zlib.compress(uncompressed, level)
-                output.write(compressed)
+                target.write(compressed)
                 current += len(compressed)
                 offsets.append(current)
-        output.seek(len(header))
+        target.seek(len(header))
         for offset in offsets:
-            output.write(OFFSET.pack(offset))
+            target.write(OFFSET.pack(offset))

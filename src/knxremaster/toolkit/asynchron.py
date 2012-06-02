@@ -22,34 +22,6 @@ import gobject
 
 gobject.threads_init()
 
-class _Caller(object):
-    def __init__(self, function, args, kwargs):
-        self.function = function
-        self.args = args
-        self.kwargs = kwargs
-        self.finished = threading.Event()
-        self.result = None
-                
-    def __call__(self):
-        self.result = self.function(*self.args, **self.kwargs)
-        self.finished.set()
-
-def gobject_exec(function):
-    def wrapper(*args, **kwargs):                        
-        caller = _Caller(function, args, kwargs)
-        gobject.idle_add(caller)
-        return caller
-    functools.update_wrapper(wrapper, function)
-    return wrapper
-
-def thread_exec(function):
-    def wrapper(*args, **kwargs):                        
-        caller = _Caller(function, args, kwargs)
-        threading.Thread(target=caller).start()
-        return caller
-    functools.update_wrapper(wrapper, function)
-    return wrapper
-
 class Event(object):
     def __init__(self):
         self.handler = []
@@ -69,58 +41,73 @@ class Events(object):
     def __init__(self):
         self.__events = {}
     
-    def connect(self, name, function, *args, **kwargs):
+    def event(self, name):
         if name not in self.__events:
             self.__events[name] = Event()
-        self.__events[name].connect(function, *args, **kwargs)
-    
-    def emit(self, name, *args, **kwargs):
-        if name not in self.__events:
-            self.__events[name] = Event()
-        self.__events[name].emit(*args, **kwargs)
+        return self.__events[name]
 
 class Condition(Events):
     def __init__(self):
         Events.__init__(self)
-        self.event = threading.Event()
+        self._event = threading.Event()
         self.value = None
     
     def __nonzero__(self):
-        return self.event.is_set()
+        return self._event.is_set()
     
     def wait(self, timeout=None):
-        self.event.wait(timeout)
+        self._event.wait(timeout)
     
     def activate(self, value=None):
-        self.event.set()
+        self._event.set()
         self.value = value
-        self.emit('activate')
+        self.event('activate').emit()
         
     def deactivate(self):     
-        self.event.clear()
-        self.emit('deactivate')
+        self._event.clear()
+        self.event('deactivate').emit()
         self.value = None
 
 class Conditions(object):
     def __init__(self):
         self.__conditions = {}
     
-    def wait(self, name):
+    def condition(self, name):
         if name not in self.__conditions:
             self.__conditions[name] = Condition()
-        self.__conditions[name].wait()
-    
-    def activate(self, name, value=None):
-        if name not in self.__conditions:
-            self.__conditions[name] = Condition()
-        self.__conditions[name].activate(value)
-    
-    def deactivate(self, name):
-        if name not in self.__conditions:
-            self.__conditions[name] = Condition()
-        self.__conditions[name].deactivate()
+        return self.__conditions[name]
 
 class ConditionsEvents(Conditions, Events):
     def __init__(self):
         Conditions.__init__(self)
-        Events.__init__(self)    
+        Events.__init__(self)
+
+class _Caller(ConditionsEvents):
+    def __init__(self, function, args, kwargs):
+        ConditionsEvents.__init__(self)
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.finished = threading.Event()
+        self.result = None
+                
+    def __call__(self):
+        self.result = self.function(*self.args, **self.kwargs)
+        self.condition('finish').activate()
+        self.event('finish').emit()
+
+def gobject_exec(function):
+    def wrapper(*args, **kwargs):                        
+        caller = _Caller(function, args, kwargs)
+        gobject.idle_add(caller)
+        return caller
+    functools.update_wrapper(wrapper, function)
+    return wrapper
+
+def thread_exec(function):
+    def wrapper(*args, **kwargs):                        
+        caller = _Caller(function, args, kwargs)
+        threading.Thread(target=caller).start()
+        return caller
+    functools.update_wrapper(wrapper, function)
+    return wrapper

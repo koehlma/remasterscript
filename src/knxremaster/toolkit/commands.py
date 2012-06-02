@@ -19,7 +19,9 @@ import functools
 import re
 import subprocess
 
-from knxremaster.framework.progress import progress, command
+from knxremaster.toolkit.progress import progress, command
+
+_MKISOFS_PERCENTAGE = re.compile(r'([0-9]*\.[0-9]*)%\s*done')
 
 mount = functools.partial(command, 'mount')
 
@@ -35,17 +37,12 @@ cpio = functools.partial(command, 'cpio')
 
 gzip = functools.partial(command, 'gzip')
 
-_MKISOFS_PERCENTAGE = re.compile(r'([0-9]*\.[0-9]*)%\s*done')
 @progress
 def mkisofs(progress, *arguments):
-    command = ['mkisofs']
-    command.extend(arguments)
-    process = subprocess.Popen(command, stderr=subprocess.PIPE)
-    progress.update(0)
+    process = subprocess.Popen(['mkisofs'] + list(arguments), stderr=subprocess.PIPE)
     while process.poll() is None:
-        if progress.cancel.is_set():
+        if progress.condition('cancel'):
             process.kill()
-            process.join()
             return
         else:
             line = process.stderr.readline()
@@ -54,4 +51,4 @@ def mkisofs(progress, *arguments):
                 progress.update(float(match.group(1)))
     progress.update(100)
     if process.returncode != 0:
-        progress.error.set()
+        progress.condition('error').activate()

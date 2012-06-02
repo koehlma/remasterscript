@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import gettext
 import os
 import os.path
@@ -22,25 +24,23 @@ import os.path
 import gobject
 import gtk
 
-from knxremaster.framework.create import Create as Worker
-from knxremaster.framework.versions import get_version
-from knxremaster.interface.decorators import gobject_idle
-
-gobject.threads_init()
+from knxremaster.create import create
+from knxremaster.versions import get_version
+from knxremaster.toolkit.asynchron import gobject_exec
 
 _ = gettext.translation('knxremaster', os.path.join(os.path.dirname(__file__), 'locale'), fallback=True).gettext
 
-_task_translation = {'mkdir': _('create directory structure...'),
-                     'copy': _('copy cd/dvd...'),
+_task_translation = {'create_directories': _('create directory structure...'),
+                     'copy_master': _('copy cd/dvd...'),
                      'filesystem_extract': _('extract compressed filesytem...'),
                      'filesystem_mount': _('mount extracted filesystem...'),
-                     'filesystem_knoppix': _('copy mounted filesystem...'),
+                     'filesystem_copy': _('copy mounted filesystem...'),
                      'filesystem_umount': _('umount compressed filesystem...'),
                      'minirt_extract': _('extract minirt...'),
                      'minirt_unpack': _('unpack minirt...'),
                      'squashfs_patch': _('patching for squashfs...'),
-                     'clean': _('cleanup...'),
-                     'settings': _('write settings...')}
+                     'cleanup': _('cleanup...'),
+                     'write_settings': _('write settings...')}
 
 class Create():
     def __init__(self):
@@ -257,15 +257,16 @@ class Create():
             self._summary()
     
     def _create(self):
-        worker = Worker(self.source.get_filename(), self.target.get_filename(),
+        script = create(self.source.get_filename(), self.target.get_filename(),
                         self.name.get_text(), self.filesystem.get_active(),
                         self.minirt.get_active(), self.squashfs.get_active(),
                         'cloop' if self.base_compression.get_active() == 0 else 'squashfs',
                         self.base_version.get_text())
-        worker.handler['started'].append(self._task_started)
-        worker.handler['update'].append(self._task_update)
-        worker.handler['success'].append(self._create_success)
-        worker.run()
+        script.event('start').connect(self._task_started)
+        script.event('update').connect(self._task_update)
+        script.event('success').connect(self._create_success)
+        script.event('error').connect(lambda *args, **kwargs: print('error -> no handling yet'))
+        script.start()
     
     def _summary(self):
         name, squashfs, base = get_version(self.source.get_filename())
@@ -288,21 +289,21 @@ class Create():
         self.progress.pulse()
         return True
     
-    @gobject_idle
-    def _task_started(self, name):
+    @gobject_exec
+    def _task_started(self, name, progress):
         if self._pulse is None:
             self._pulse = gobject.timeout_add(100, self._task_pulse)
         self.status.set_text(_task_translation[name])
     
-    @gobject_idle
-    def _task_update(self, percentage, message):
+    @gobject_exec
+    def _task_update(self, name, percentage, message):
         if self._pulse is None:
             self.progress.set_fraction(percentage / 100)
         else:
             gobject.source_remove(self._pulse)
             self._pulse = None
     
-    @gobject_idle
+    @gobject_exec
     def _create_success(self):
         self.assistant.set_page_complete(self.create, True)
         if self._pulse is not None:
@@ -310,3 +311,10 @@ class Create():
             self.progress.set_fraction(1)
         self.status.set_text(_('Finished...'))
         self.assistant.set_current_page(4)
+
+if __name__ == '__main__':
+    interface = Create()
+    interface.assistant.show_all()
+    interface.assistant.connect('cancel', lambda *args: gtk.main_quit())
+    interface.assistant.connect('close', lambda *args: gtk.main_quit())
+    gtk.main()

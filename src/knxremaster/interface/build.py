@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import gettext
 import os
 import os.path
@@ -22,11 +24,9 @@ import os.path
 import gobject
 import gtk
 
-from knxremaster.framework.build import Build as Worker
-from knxremaster.framework.versions import get_version
-from knxremaster.interface.decorators import gobject_idle
-
-gobject.threads_init()
+from knxremaster.build import build
+from knxremaster.versions import get_version
+from knxremaster.toolkit.asynchron import gobject_exec
 
 _ = gettext.translation('knxremaster', os.path.join(os.path.dirname(__file__), 'locale'), fallback=True).gettext
 
@@ -36,8 +36,8 @@ _task_translation = {'prepare': _('prepare for building...'),
                      'minirt_files': _('collect files for minirt...'),
                      'minirt_image': _('create minirt image...'),
                      'minirt_compress': _('compress minirt image...'),
-                     'iso': _('create cd/dvd iso image...'),
-                     'clean': _('cleanup...')}
+                     'iso_image': _('create cd/dvd iso image...'),
+                     'cleanup': _('cleanup...')}
 
 class Build():
     def __init__(self):
@@ -174,11 +174,12 @@ class Build():
             self._summary()
     
     def _build(self):
-        worker = Worker(self.source.get_filename())
-        worker.handler['started'].append(self._task_started)
-        worker.handler['update'].append(self._task_update)
-        worker.handler['success'].append(self._create_success)
-        worker.run()
+        script = build(self.source.get_filename())
+        script.event('start').connect(self._task_started)
+        script.event('update').connect(self._task_update)
+        script.event('success').connect(self._create_success)
+        script.event('error').connect(lambda *args, **kwargs: print('error -> no handling yet'))
+        script.start()
     
     def _summary(self):
         name, squashfs, base = get_version(os.path.join(self.source.get_filename(), 'master'))
@@ -199,21 +200,21 @@ class Build():
         self.progress.pulse()
         return True
     
-    @gobject_idle
-    def _task_started(self, name):
+    @gobject_exec
+    def _task_started(self, name, progress):
         if self._pulse is None:
             self._pulse = gobject.timeout_add(100, self._task_pulse)
         self.status.set_text(_task_translation[name])
     
-    @gobject_idle
-    def _task_update(self, percentage, message):
+    @gobject_exec
+    def _task_update(self, name, percentage, message):
         if self._pulse is None:
             self.progress.set_fraction(percentage / 100)
         else:
             gobject.source_remove(self._pulse)
             self._pulse = None
     
-    @gobject_idle
+    @gobject_exec
     def _create_success(self):
         self.assistant.set_page_complete(self.build, True)
         if self._pulse is not None:
@@ -221,3 +222,10 @@ class Build():
             self.progress.set_fraction(1)
         self.status.set_text(_('Finished...'))
         self.assistant.set_current_page(3)
+
+if __name__ == '__main__':
+    interface = Build()
+    interface.assistant.show_all()
+    interface.assistant.connect('cancel', lambda *args: gtk.main_quit())
+    interface.assistant.connect('close', lambda *args: gtk.main_quit())
+    gtk.main()
