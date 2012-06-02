@@ -39,6 +39,7 @@ class Isolinux(dict):
                         self.attributes['default'] = argument
                     else:
                         self.attributes[command] = argument
+                        
     def save(self, filename=None):
         if filename is None:
             filename = self.filename
