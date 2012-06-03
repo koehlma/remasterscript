@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: knxremaster\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-29 22:47+0100\n"
-"PO-Revision-Date: 2012-06-02 14:47+0100\n"
+"POT-Creation-Date: 2012-06-03 20:57+0100\n"
+"PO-Revision-Date: 2012-06-03 20:57+0100\n"
 "Last-Translator: Maximilian Köhl <linuxmaxi@googlemail.com>\n"
 "Language-Team: \n"
 "Language: \n"
@@ -16,45 +16,123 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-SearchPath-0: ./interface\n"
 
-#: interface/build.py:33
-msgid "prepare for building..."
-msgstr "Bauen Vorbereiten..."
+#: interface/micro.py:32
+msgid "unpack iso image..."
+msgstr "packe iso image aus..."
 
-#: interface/build.py:34
-msgid "create filesystem image..."
-msgstr "Erstelle Dateisystemimage..."
-
-#: interface/build.py:35
-msgid "compress filesystem image..."
-msgstr "Komprimiere Dateisystemimage..."
-
-#: interface/build.py:36
-msgid "collect files for minirt..."
-msgstr "Sammle Dateien für Minirt..."
-
-#: interface/build.py:37
-msgid "create minirt image..."
-msgstr "Erstelle Minirtimage..."
-
+#: interface/micro.py:33
 #: interface/build.py:38
-msgid "compress minirt image..."
-msgstr "Komprimiere Minirtimage..."
-
-#: interface/build.py:39
-msgid "create cd/dvd iso image..."
-msgstr "CD/DVD ISO Image erstellen..."
-
-#: interface/build.py:40
-#: interface/create.py:42
 msgid "cleanup..."
 msgstr "Aufräumen..."
 
-#: interface/build.py:45
-#: interface/create.py:48
+#: interface/micro.py:38
+#: interface/build.py:43
+#: interface/create.py:45
 msgid "Knoppix Remasterscript"
 msgstr "Knoppix Remasterskript"
 
-#: interface/build.py:57
+#: interface/micro.py:50
+msgid ""
+"<span weight=\"bold\">Welcome to Knoppix Remasterscript!!!</span>\n"
+"This assistant will guide you through the steps of micro remastering Knoppix."
+msgstr ""
+"<span weight=\"bold\">Willkommen zum Knoppix Remasterskript!!!</span>\n"
+"Dieser Assistent führt Dich durch die Schritte, die für ein Micro-Remaster erforderlich sind."
+
+#: interface/micro.py:54
+#: interface/build.py:61
+#: interface/create.py:64
+msgid "Source"
+msgstr "Quelle"
+
+#: interface/micro.py:64
+#: interface/create.py:71
+msgid "Target"
+msgstr "Ziel"
+
+#: interface/micro.py:72
+#: interface/build.py:69
+#: interface/create.py:79
+msgid "Source:"
+msgstr "Quelle:"
+
+#: interface/micro.py:76
+#: interface/create.py:83
+msgid "Target:"
+msgstr "Ziel:"
+
+#: interface/micro.py:90
+#: interface/build.py:83
+#: interface/create.py:98
+msgid "Welcome"
+msgstr "Willkommen"
+
+#: interface/micro.py:95
+msgid ""
+"<span weight=\"bold\">Unpacking for micro remastering!!!</span>\n"
+"This script is now unpacking the ISO for micro remastering."
+msgstr ""
+"<span weight=\"bold\">Auspacken für ein Micro-Remaster!!!</span>\n"
+"Dieses Skript packt das ISO nun für ein Micor-Remaster aus."
+
+#: interface/micro.py:112
+msgid "Unpack"
+msgstr "Auspacken"
+
+#: interface/micro.py:116
+msgid "Background"
+msgstr "Hintergrund"
+
+#: interface/micro.py:124
+msgid "Save"
+msgstr "Speichern"
+
+#: interface/micro.py:130
+msgid "Background:"
+msgstr "Hintergrund:"
+
+#: interface/micro.py:134
+msgid "Save:"
+msgstr "Speichern:"
+
+#: interface/micro.py:147
+msgid "Remaster"
+msgstr "Remaster"
+
+#: interface/micro.py:227
+#: interface/script.py:85
+msgid "Finished..."
+msgstr "Fertig..."
+
+#: interface/build.py:31
+msgid "prepare for building..."
+msgstr "Bauen Vorbereiten..."
+
+#: interface/build.py:32
+msgid "create filesystem image..."
+msgstr "Erstelle Dateisystemimage..."
+
+#: interface/build.py:33
+msgid "compress filesystem image..."
+msgstr "Komprimiere Dateisystemimage..."
+
+#: interface/build.py:34
+msgid "collect files for minirt..."
+msgstr "Sammle Dateien für Minirt..."
+
+#: interface/build.py:35
+msgid "create minirt image..."
+msgstr "Erstelle Minirtimage..."
+
+#: interface/build.py:36
+msgid "compress minirt image..."
+msgstr "Komprimiere Minirtimage..."
+
+#: interface/build.py:37
+msgid "create cd/dvd iso image..."
+msgstr "CD/DVD ISO Image erstellen..."
+
+#: interface/build.py:58
 msgid ""
 "<span weight=\"bold\">Welcome to Knoppix Remasterscript!!!</span>\n"
 "This assistant will guide you through the steps of building your own Remaster."
@@ -62,23 +140,8 @@ msgstr ""
 "<span weight=\"bold\">Willkommen zum Knoppix Remasterskript!!!</span>\n"
 "Dieser Assistent führt Dich durch die Schritte, die zum Bauen Deines Remasters erforderlich sind."
 
-#: interface/build.py:60
-#: interface/create.py:64
-msgid "Source"
-msgstr "Quelle"
-
-#: interface/build.py:68
-#: interface/create.py:79
-msgid "Source:"
-msgstr "Quelle:"
-
-#: interface/build.py:82
-#: interface/create.py:97
-msgid "Welcome"
-msgstr "Willkommen"
-
-#: interface/build.py:87
-#: interface/create.py:144
+#: interface/build.py:88
+#: interface/create.py:143
 msgid ""
 "<span weight=\"bold\">Summary!!!</span>\n"
 "Please check if everything is correct."
@@ -86,183 +149,262 @@ msgstr ""
 "<span weight=\"bold\">Zusammenfassung!!!</span>\n"
 "Bitte überprüfe ob alles korrekt ist."
 
-#: interface/build.py:100
-#: interface/create.py:114
+#: interface/build.py:101
+#: interface/create.py:116
 msgid "Name:"
 msgstr "Name:"
 
-#: interface/build.py:104
-#: interface/create.py:159
+#: interface/build.py:105
+#: interface/create.py:158
 msgid "Base Version:"
 msgstr "Basis Version:"
 
-#: interface/build.py:108
+#: interface/build.py:109
 msgid "Compression:"
 msgstr "Kompression:"
 
-#: interface/build.py:122
+#: interface/build.py:123
 #: interface/create.py:181
 msgid "Summary"
 msgstr "Zusammenfassung"
 
-#: interface/build.py:128
+#: interface/build.py:129
 msgid ""
 "<span weight=\"bold\">Building a new Remaster!!!</span>\n"
-"This script is now building a new Remaster only for you."
+"This script is now building a new Remaster."
 msgstr ""
 "<span weight=\"bold\">Baue ein neues Remaster!!!</span>\n"
-"Dieses Skript baut nun ein neues Remaster, nur für Dich."
+"Dieses Skript baut nun ein neues Remaster."
 
-#: interface/build.py:145
+#: interface/build.py:142
 msgid "Build"
 msgstr "Bauen"
 
-#: interface/build.py:150
-#: interface/create.py:209
+#: interface/build.py:147
 msgid ""
-"<span weight=\"bold\">Remaster successful created!!!</span>\n"
-"Finished. A new Remaster was created."
+"<span weight=\"bold\">Remaster successful built!!!</span>\n"
+"Finished. A new Remaster was built."
 msgstr ""
 "<span weight=\"bold\">Neues Remaster erstellt!!!</span>\n"
 "Fertig. Ein neues Remaster wurde erstellt."
 
-#: interface/build.py:161
-#: interface/create.py:220
+#: interface/build.py:158
+#: interface/create.py:216
 msgid "Finished"
 msgstr "Fertig"
 
-#: interface/build.py:186
-#: interface/build.py:189
-#: interface/create.py:273
+#: interface/build.py:179
+#: interface/build.py:182
+#: interface/create.py:267
 msgid "Unknown"
 msgstr "Unbekannt"
 
-#: interface/build.py:192
-#: interface/build.py:196
-#: interface/create.py:151
+#: interface/build.py:185
+#: interface/build.py:189
+#: interface/create.py:150
 msgid "Cloop"
 msgstr "Cloop"
 
-#: interface/build.py:194
-#: interface/create.py:152
+#: interface/build.py:187
+#: interface/create.py:151
 msgid "SquashFS"
 msgstr "SquashFS"
 
-#: interface/build.py:222
-#: interface/create.py:311
-msgid "Finished..."
-msgstr "Fertig..."
+#: interface/script.py:77
+msgid "Error..."
+msgstr "Fehler..."
 
-#: interface/create.py:33
-msgid "create directory structure..."
-msgstr "Erstelle Verzeichnis Struktur..."
+#: interface/script.py:78
+#: interface/isolinux.py:129
+#: interface/isolinux.py:131
+#: interface/isolinux.py:152
+#: interface/isolinux.py:154
+#: interface/isolinux.py:167
+msgid "Error"
+msgstr "Fehler"
 
-#: interface/create.py:34
-msgid "copy cd/dvd..."
+#: interface/script.py:78
+#, python-format
+msgid "Error occurred during: \"%s\""
+msgstr "Fehler während:  \"%s\""
+
+#: interface/isolinux.py:26
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: interface/isolinux.py:36
+msgid "Label:"
+msgstr "Name:"
+
+#: interface/isolinux.py:38
+msgid "Kernel:"
+msgstr "Kernel:"
+
+#: interface/isolinux.py:40
+msgid "Append:"
+msgstr "Optionen:"
+
+#: interface/isolinux.py:81
+msgid "Label"
+msgstr "Name"
+
+#: interface/isolinux.py:87
+msgid "Kernel"
+msgstr "Kernel"
+
+#: interface/isolinux.py:93
+msgid "Append"
+msgstr "Optionen"
+
+#: interface/isolinux.py:112
+msgid "Default:"
+msgstr "Standard:"
+
+#: interface/isolinux.py:114
+msgid "Timeout:"
+msgstr "Zeitbeschränkung:"
+
+#: interface/isolinux.py:129
+msgid "You could not edit the label of the current default entry."
+msgstr "Du kannst den Namen nicht bearbeiten, wenn er als Standard Eintrag ausgewählt ist."
+
+#: interface/isolinux.py:131
+msgid "You cloud not edit the label of the default entry."
+msgstr "Du kannst den Name des Standard Eintrags nicht ändern."
+
+#: interface/isolinux.py:152
+msgid "You could not remove the the current default entry."
+msgstr "Du kannst den aktuellen Standard Eintrag nicht entfernen."
+
+#: interface/isolinux.py:154
+msgid "You cloud not remove the default entry."
+msgstr "Du kannst den Standard Eintrag nicht entfernen."
+
+#: interface/isolinux.py:167
+msgid "Entry already exists."
+msgstr "Dieser Eintrag existiert bereits."
+
+#: interface/create.py:31
+msgid "creating target directory structure..."
+msgstr "Erstelle Ziel-Verzeichnis Struktur..."
+
+#: interface/create.py:32
+msgid "copying cd/dvd..."
 msgstr "Kopiere CD/DVD..."
 
+#: interface/create.py:33
+msgid "writing settings..."
+msgstr "Schreibe Einstellungen..."
+
+#: interface/create.py:34
+msgid "decompressing filesystem..."
+msgstr "Dekomprimiere Dateisystemimage..."
+
 #: interface/create.py:35
-msgid "extract compressed filesytem..."
-msgstr "Entpacke Dateisystem..."
+msgid "mounting decompressed filesystem..."
+msgstr "Mounte dekomprimiertes Dateisystem..."
 
 #: interface/create.py:36
-msgid "mount extracted filesystem..."
-msgstr "Mounte entpacktes Dateisystem..."
-
-#: interface/create.py:37
-msgid "copy mounted filesystem..."
+msgid "copying filesystem..."
 msgstr "Kopiere gemountetes Dateisystem..."
 
+#: interface/create.py:37
+msgid "umounting decompressed filesystem"
+msgstr "Umounte dekomprimiertes Dateisystem..."
+
 #: interface/create.py:38
-msgid "umount compressed filesystem..."
-msgstr "Umounte komprimiertes Dateisystem..."
+msgid "decompressing minirt..."
+msgstr "Dekomprimiere Minirt..."
 
 #: interface/create.py:39
-msgid "extract minirt..."
-msgstr "Minirt Dekomprimieren..."
+msgid "unpacking decompressed minirt..."
+msgstr "Minirt Entpacken... "
 
 #: interface/create.py:40
-msgid "unpack minirt..."
-msgstr "Minirt Entpacken..."
-
-#: interface/create.py:41
-msgid "patching for squashfs..."
-msgstr "Patching für SquashFS..."
-
-#: interface/create.py:43
-msgid "write settings..."
-msgstr "Schreibe Einstellungen..."
+msgid "cleaning up..."
+msgstr "Aufräumen..."
 
 #: interface/create.py:61
 msgid ""
 "<span weight=\"bold\">Welcome to Knoppix Remasterscript!!!</span>\n"
-"This assistant will guide you through the steps of creating your own Remaster."
+"This assistant will guide you through the steps of creating your own remaster."
 msgstr ""
 "<span weight=\"bold\">Willkommen zum Knoppix Remasterskript!!!</span>\n"
 "Dieser Assistent führt Dich durch die Schritte, die zum Erstellen Deines Remasters erforderlich sind."
 
-#: interface/create.py:71
-msgid "Target"
-msgstr "Ziel"
-
-#: interface/create.py:83
-msgid "Target:"
-msgstr "Ziel:"
-
-#: interface/create.py:102
+#: interface/create.py:103
 msgid "My Remaster"
 msgstr "Mein Remaster"
 
-#: interface/create.py:118
+#: interface/create.py:120
 msgid "Extract Filesystem:"
 msgstr "Dateisystem Entpacken:"
 
-#: interface/create.py:122
+#: interface/create.py:124
 msgid "Extract Minirt:"
 msgstr "Minirt Entpacken:"
 
-#: interface/create.py:126
-#: interface/create.py:285
+#: interface/create.py:128
+#: interface/create.py:279
 msgid "SquashFS:"
 msgstr "SquashFS:"
 
-#: interface/create.py:139
+#: interface/create.py:138
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: interface/create.py:163
+#: interface/create.py:162
 msgid "Base Compression:"
 msgstr "Basis Kompression:"
 
-#: interface/create.py:167
+#: interface/create.py:166
 msgid "Options:"
 msgstr "Optionen:"
 
 #: interface/create.py:187
 msgid ""
 "<span weight=\"bold\">Creating a new Remaster!!!</span>\n"
-"This script is now creating a new Remaster only for you."
+"This script is now creating a new remaster."
 msgstr ""
 "<span weight=\"bold\">Erstelle ein neues Remaster!!!</span>\n"
-"Dieses Skript erstellt nun ein neues Remaster, nur für Dich."
+"Dieses Skript erstellt nun ein neues Remaster."
 
-#: interface/create.py:204
+#: interface/create.py:200
 msgid "Create"
 msgstr "Erstellen"
 
-#: interface/create.py:282
+#: interface/create.py:205
+msgid ""
+"<span weight=\"bold\">Remaster successful created!!!</span>\n"
+"Finished. A new remaster was created."
+msgstr ""
+"<span weight=\"bold\">Neues Remaster erstellt!!!</span>\n"
+"Fertig. Ein neues Remaster wurde erstellt."
+
+#: interface/create.py:276
 msgid "Yes"
 msgstr "Ja"
 
-#: interface/create.py:282
+#: interface/create.py:276
 msgid "No"
 msgstr "Nein"
 
-#: interface/create.py:283
+#: interface/create.py:277
 msgid "Filesystem:"
 msgstr "Dateisystem:"
 
-#: interface/create.py:284
+#: interface/create.py:278
 msgid "Minirt:"
 msgstr "Minirt:"
 
+#~ msgid "extract compressed filesytem..."
+#~ msgstr "Entpacke Dateisystem..."
+
+#~ msgid "mount extracted filesystem..."
+#~ msgstr "Mounte entpacktes Dateisystem..."
+
+#~ msgid "extract minirt..."
+#~ msgstr "Minirt Dekomprimieren..."
+
+#~ msgid "patching for squashfs..."
+#~ msgstr "Patching für SquashFS..."

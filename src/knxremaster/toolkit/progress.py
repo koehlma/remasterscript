@@ -114,7 +114,7 @@ class _Script(ConditionsEvents):
                         break
                     elif progress.condition('error'):
                         self.condition('error').activate()
-                        self.error = name
+                        self.error = (name, progress)
                         break
                     self.event('finish').emit(name, self.progress)
             except:
@@ -124,7 +124,7 @@ class _Script(ConditionsEvents):
             if self.condition('cancel'):
                 self.event('cancel').emit()
             elif self.condition('error'):
-                self.event('error').emit()
+                self.event('error').emit(*self.error)
             else:
                 self.event('success').emit()
         return call()       

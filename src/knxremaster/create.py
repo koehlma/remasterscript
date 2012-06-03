@@ -73,11 +73,11 @@ if __name__ == '__main__':
     _steps = {'create_directories': 'creating target directory structure...',
               'copy_master': 'copying cd/dvd...',
               'write_settings': 'writing settings...',
-              'filesystem_extract': 'decompressing filesystem...',
+              'filesystem_decompress': 'decompressing filesystem...',
               'filesystem_mount': 'mounting decompressed filesystem...',
               'filesystem_copy': 'copying filesystem...',
               'filesystem_umount': 'umounting decompressed filesystem',
-              'minirt_extract': 'decompressing minirt...',
+              'minirt_decompress': 'decompressing minirt...',
               'minirt_unpack': 'unpacking decompressed minirt...',
               'cleanup': 'cleaning up...'}
     

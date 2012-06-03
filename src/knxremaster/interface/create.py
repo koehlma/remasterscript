@@ -17,63 +17,63 @@
 
 from __future__ import print_function
 
-import gettext
 import os
 import os.path
 
-import gobject
 import gtk
 
 from knxremaster.create import create
-from knxremaster.versions import get_version
+from knxremaster.interface.misc import translate as _
+from knxremaster.interface.script import Script
 from knxremaster.toolkit.asynchron import gobject_exec
+from knxremaster.versions import get_version
 
-_ = gettext.translation('knxremaster', os.path.join(os.path.dirname(__file__), 'locale'), fallback=True).gettext
-
-_task_translation = {'create_directories': _('create directory structure...'),
-                     'copy_master': _('copy cd/dvd...'),
-                     'filesystem_decompress': _('extract compressed filesytem...'),
-                     'filesystem_mount': _('mount extracted filesystem...'),
-                     'filesystem_copy': _('copy mounted filesystem...'),
-                     'filesystem_umount': _('umount compressed filesystem...'),
-                     'minirt_decompress': _('extract minirt...'),
-                     'minirt_unpack': _('unpack minirt...'),
-                     'squashfs_patch': _('patching for squashfs...'),
-                     'cleanup': _('cleanup...'),
-                     'write_settings': _('write settings...')}
+_steps = {'create_directories': _('creating target directory structure...'),
+          'copy_master': _('copying cd/dvd...'),
+          'write_settings': _('writing settings...'),
+          'filesystem_decompress': _('decompressing filesystem...'),
+          'filesystem_mount': _('mounting decompressed filesystem...'),
+          'filesystem_copy': _('copying filesystem...'),
+          'filesystem_umount': _('umounting decompressed filesystem'),
+          'minirt_decompress': _('decompressing minirt...'),
+          'minirt_unpack': _('unpacking decompressed minirt...'),
+          'cleanup': _('cleaning up...')}
 
 class Create():
     def __init__(self):
         self.assistant = gtk.Assistant()
         self.assistant.set_title(_('Knoppix Remasterscript'))
-        self.assistant.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.assistant.set_position(gtk.WIN_POS_CENTER)
         self.assistant.set_icon_from_file(os.path.join(os.path.dirname(__file__), 'resources', 'icon.png'))
-        self.assistant.connect('prepare', self._prepare_page)
+        self.assistant.connect('prepare', self._prepare)
+        
+        self.script = Script(create, _steps)
+        self.script.event('success').connect(self._success)     
+        
         self._setup_page_welcome()
         self._setup_page_settings()
         self._setup_page_summary()
         self._setup_page_create()
         self._setup_page_finished()        
-        self._pulse = None
-        
+       
     def _setup_page_welcome(self):
         welcome = gtk.Label()
-        welcome.set_markup(_('<span weight="bold">Welcome to Knoppix Remasterscript!!!</span>\nThis assistant will guide you through the steps of creating your own Remaster.'))
+        welcome.set_markup(_('<span weight="bold">Welcome to Knoppix Remasterscript!!!</span>\nThis assistant will guide you through the steps of creating your own remaster.'))
         welcome.set_alignment(0, 0.5)
         
         self.source = gtk.FileChooserButton(gtk.FileChooserDialog(_('Source'), parent=self.assistant,
                                                                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                                                   buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK)))
-        self.source.set_filename(os.curdir)
-        self._source_set = False
+        self.source.set_current_folder(os.curdir)
         self.source.connect('current-folder-changed', self._source_changed)
+        self._source_set = False        
         
         self.target = gtk.FileChooserButton(gtk.FileChooserDialog(_('Target'), parent=self.assistant,
                                                                   action=gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
                                                                   buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK)))
-        self.target.set_filename(os.curdir)
-        self._target_set = False
+        self.target.set_current_folder(os.curdir)
         self.target.connect('current-folder-changed', self._target_changed)
+        self._target_set = False
         
         table = gtk.Table(2, 2)
         label = gtk.Label(_('Source:'))
@@ -86,8 +86,9 @@ class Create():
         table.attach(self.target, 1, 2, 1, 2, ypadding=2)
         
         box = gtk.VBox()
-        box.pack_start(welcome, False, False, 5)
-        box.pack_start(table, False, False, 5)               
+        box.set_spacing(5)
+        box.pack_start(welcome, False, False)
+        box.pack_start(table, False, False)               
         
         self.welcome = gtk.Alignment(1, 1, 1, 1)
         self.welcome.add(box)
@@ -109,6 +110,7 @@ class Create():
         
         self.squashfs = gtk.CheckButton()
         self.squashfs.connect('toggled', self._squashfs_changed)
+        self.squashfs.set_sensitive(False)
         
         table = gtk.Table(4, 2)
         label = gtk.Label(_('Name:'))
@@ -126,13 +128,10 @@ class Create():
         label = gtk.Label(_('SquashFS:'))
         label.set_alignment(1, 0.5)
         table.attach(label, 0, 1, 3, 4, xoptions=gtk.FILL, xpadding=5, ypadding=2)
-        table.attach(self.squashfs, 1, 2, 3, 4, ypadding=2)
-
-        box = gtk.VBox()
-        box.pack_start(table, False, False, 5)               
+        table.attach(self.squashfs, 1, 2, 3, 4, ypadding=2)            
         
         self.settings = gtk.Alignment(1, 1, 1, 1)
-        self.settings.add(box)
+        self.settings.add(table)
         self.settings.set_padding(5, 5, 5, 5)
 
         self.assistant.append_page(self.settings)
@@ -170,8 +169,9 @@ class Create():
         table.attach(self.options, 1, 2, 2, 3, ypadding=2)
 
         box = gtk.VBox()
-        box.pack_start(summary, False, False, 5)
-        box.pack_start(table, False, False, 5)               
+        box.set_spacing(5)
+        box.pack_start(summary, False, False)
+        box.pack_start(table, False, False)               
                 
         self.summary = gtk.Alignment(1, 1, 1, 1)
         self.summary.add(box)
@@ -184,17 +184,13 @@ class Create():
     
     def _setup_page_create(self):
         create = gtk.Label()
-        create.set_markup(_('<span weight="bold">Creating a new Remaster!!!</span>\nThis script is now creating a new Remaster only for you.'))
+        create.set_markup(_('<span weight="bold">Creating a new Remaster!!!</span>\nThis script is now creating a new remaster.'))
         create.set_alignment(0, 0.5)
         
-        self.progress = gtk.ProgressBar()
-        self.status = gtk.Label()
-        self.status.set_alignment(0, 0.5)
-        
         box = gtk.VBox()
-        box.pack_start(create, False, False, 5)
-        box.pack_start(self.progress, False, False, 5)
-        box.pack_start(self.status, False, False, 5) 
+        box.set_spacing(5)
+        box.pack_start(create, False, False)
+        box.pack_start(self.script)
         
         self.create = gtk.Alignment(1, 1, 1, 1)
         self.create.add(box)
@@ -206,7 +202,7 @@ class Create():
     
     def _setup_page_finished(self):
         finished = gtk.Label()
-        finished.set_markup(_('<span weight="bold">Remaster successful created!!!</span>\nFinished. A new Remaster was created.'))
+        finished.set_markup(_('<span weight="bold">Remaster successful created!!!</span>\nFinished. A new remaster was created.'))
         finished.set_alignment(0, 0.5)
                
         box = gtk.VBox()
@@ -252,23 +248,18 @@ class Create():
         else:
             self.assistant.set_page_complete(self.welcome, False)
     
-    def _prepare_page(self, assistant, page):
+    def _prepare(self, assistant, page):
         if page == self.create:
             self._create()
         elif page == self.summary:
             self._summary()
     
     def _create(self):
-        script = create(self.source.get_filename(), self.target.get_filename(),
-                        self.name.get_text(), self.filesystem.get_active(),
-                        self.minirt.get_active(), self.squashfs.get_active(),
-                        'cloop' if self.base_compression.get_active() == 0 else 'squashfs',
-                        self.base_version.get_text())
-        script.event('start').connect(self._task_started)
-        script.event('update').connect(self._task_update)
-        script.event('success').connect(self._create_success)
-        script.event('error').connect(lambda *args, **kwargs: print('error -> no handling yet'))
-        script.start()
+        self.script.start(self.source.get_filename(), self.target.get_filename(),
+                          self.name.get_text(), self.filesystem.get_active(),
+                          self.minirt.get_active(), self.squashfs.get_active(),
+                          'cloop' if self.base_compression.get_active() == 0 else 'squashfs',
+                          self.base_version.get_text())
     
     def _summary(self):
         name, squashfs, base = get_version(self.source.get_filename())
@@ -287,31 +278,9 @@ class Create():
                                                          _('Minirt:'), _yes_no[self.minirt.get_active()],
                                                          _('SquashFS:'), _yes_no[self.squashfs.get_active()]))
     
-    def _task_pulse(self):
-        self.progress.pulse()
-        return True
-    
     @gobject_exec
-    def _task_started(self, name, progress):
-        if self._pulse is None:
-            self._pulse = gobject.timeout_add(100, self._task_pulse)
-        self.status.set_text(_task_translation[name])
-    
-    @gobject_exec
-    def _task_update(self, name, percentage, message):
-        if self._pulse is None:
-            self.progress.set_fraction(percentage / 100)
-        else:
-            gobject.source_remove(self._pulse)
-            self._pulse = None
-    
-    @gobject_exec
-    def _create_success(self):
+    def _success(self):
         self.assistant.set_page_complete(self.create, True)
-        if self._pulse is not None:
-            gobject.source_remove(self._pulse)
-            self.progress.set_fraction(1)
-        self.status.set_text(_('Finished...'))
         self.assistant.set_current_page(4)
 
 if __name__ == '__main__':
